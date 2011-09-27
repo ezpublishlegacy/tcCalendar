@@ -1,0 +1,4 @@
+<?
+[ExtensionSettings]           
+DesignExtensions[]=tccalendar
+?>

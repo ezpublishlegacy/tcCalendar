@@ -1,0 +1,6 @@
+<?
+
+[ModuleSettings] 
+ExtensionRepositories[]=tccalendar
+
+?>
