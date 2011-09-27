@@ -28,8 +28,7 @@ class monthtojsonOperator
     function modify( $tpl, &$operatorName, &$operatorParameters, $rootNamespace, $currentNamespace, &$operatorValue, &$namedParameters )
     {
 		$tc = new tcCalendar($operatorValue);
-		$tc->monthtojson();
-		$operatorValue = '';
+		$operatorValue = $tc->monthtojson();
 		return true;
     }
 

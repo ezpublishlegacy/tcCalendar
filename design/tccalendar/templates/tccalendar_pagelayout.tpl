@@ -1,2 +1,2 @@
-{$module_results.content}
+{$module_result.content}
 {kill_debug()}

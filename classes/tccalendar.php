@@ -38,8 +38,7 @@ class tcCalendar {
 	}
 	
 	function monthtojson() {
-		header("Content-type: text/javascript");
-		echo "var tcevents = [\r\n";
+		$output =  "var tcevents = [\r\n";
 		foreach($this->events as $e) {
 			
 			$event_id = $e->attribute('node_id');
@@ -53,10 +52,10 @@ class tcCalendar {
 			foreach($e_o as $k=>$v) {
 				if ($v) $out .= "$k: $v,\r\n";
 			}
-			echo preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n" ;
+			$output .= preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n" ;
 		}
-		echo "];\r\n";
-		
+		$output .= "];\r\n";
+		return $output;
 	}
 	
 	function get_event_start($objData) {
