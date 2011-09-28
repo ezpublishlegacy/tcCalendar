@@ -93,7 +93,7 @@ class tcCalendar {
 		$date_from = $objData[$this->sd]->attribute('data_int');
 		$time_from = $objData[$this->st]->attribute('data_int');
 		
-		$out = "new Date(" . date('Y',$date_from) . ", " . (int)date('m',$date_from) -1 . ", " . date('d',$date_from) . ", " . date('H',$time_from) . ", " . date('i',$time_from) .")";
+		$out = "new Date(" . date('Y',$date_from) . ", " . (floor(date('m',$date_from)) -1) . ", " . date('d',$date_from) . ", " . date('H',$time_from) . ", " . date('i',$time_from) .")";
 		
 		return $out;
 			 
@@ -109,7 +109,7 @@ class tcCalendar {
 		
 		if ($time_to == 0 || date('His', $time_to) == '000000') return false;
 		
-		$out =  "new Date(".date('Y',$date_to).", ".(int)date('m',$date_to) -1.", ".date('d',$date_to).", ".date('H',$time_to).", ".date('i',$time_to).")";
+		$out =  "new Date(".date('Y',$date_to).", ". (floor(date('m',$date_to)) -1) .", ".date('d',$date_to).", ".date('H',$time_to).", ".date('i',$time_to).")";
 		
 		return $out;
 				
