@@ -93,7 +93,7 @@ class tcCalendar {
 		$date_from = $objData[$this->sd]->attribute('data_int');
 		$time_from = $objData[$this->st]->attribute('data_int');
 		
-		$out = "new Date(" . date('Y',$date_from) . ", " . date('m',$date_from) . ", " . date('d',$date_from) . ", " . date('i',$time_from) . ", " . date('s',$time_from) .")";
+		$out = "new Date(" . date('Y',$date_from) . ", " . date('m',$date_from) . ", " . date('d',$date_from) . ", " . date('G',$time_from) . ", " . date('i',$time_from) .")";
 		
 		return $out;
 			 
