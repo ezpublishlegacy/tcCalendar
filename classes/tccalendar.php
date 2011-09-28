@@ -73,6 +73,7 @@ class tcCalendar {
 			$e_o->title = '"'.addslashes($objData[$this->title_id]->content()).'"';
 			$e_o->start = $this->get_event_start($objData);
 			$e_o->end = $this->get_event_end($objData);
+			$e_o->url = '"/' . $e->urlAlias(). '"';
 			$out = chr(123);
 			foreach($e_o as $k=>$v) {
 				if ($v) $out .= "$k: $v,\r\n";
