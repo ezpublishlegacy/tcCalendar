@@ -5,9 +5,11 @@
 {ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css'))}
 {ezscript_require(array('fullcalendar.js'))}
 
+{def $data_src = concat('/layout/set/monthtojson', $node.object.main_node.url_alias|ezroot(no))}
+
 {literal}
 
-<script type='text/javascript' src='/layout/set/monthtojson/Medicare/Medicare-Event-Calendar'></script>
+<script type='text/javascript' src='{/literal}{$data_src}{literal}'></script>
 <script type='text/javascript'>
 	$(document).ready(function() {
 		

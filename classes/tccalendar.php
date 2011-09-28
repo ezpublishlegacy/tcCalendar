@@ -4,17 +4,22 @@ class tcCalendar {
 
 	function tcCalendar($cal_id, $from_time = null, $to_time = null) {
 		
+		$ezphpicalendarini = eZINI::instance( 'tccalendar.ini' );
+		
+		$this->is_master = $ezphpicalendarini->variable( 'ClassSettings', 'IsMasterAttributeIdentifier' );
+		
+		if ($this->is_master) $cal_id = 2;
+		
 		$this->node_id = $cal_id;
 
 		$cal_node = eZContentObjectTreeNode::fetch($cal_id);
 
 		$cal_node_data = $cal_node->dataMap();
 		
-		$ezphpicalendarini = eZINI::instance( 'tccalendar.ini' );
-		
 		$eventclasses = $ezphpicalendarini->variable( "ClassSettings", "EventClassIds" );
 		
 		$this->title_id = $ezphpicalendarini->variable( "ClassSettings", "TitleAttributeIdentifier");
+		$this->calcol_id = $ezphpicalendarini->variable( "ClassSettings", "CalColorAttributeIdentifier");
 		$this->sd = $ezphpicalendarini->variable( "ClassSettings", "StartDateAttributeIdentifier");
 		$this->st = $ezphpicalendarini->variable( "ClassSettings", "StartTimeAttributeIdentifier");
 		$this->ed = $ezphpicalendarini->variable( "ClassSettings", "EndDateAttributeIdentifier");
@@ -22,7 +27,13 @@ class tcCalendar {
 		
 		if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
 
-		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses, 'Depth' => 1, 'DepthOperator' => 'eq');
+		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
+		
+		
+		if (!$this->is_master) {
+			$params['Depth'] = 1;
+			$params['DepthOperator'] = 'eq';
+		}
 		
 		$attribute_filter = array();
 		if ($to_time != null) $attribute_filter[] = array("event/from_time", "<=", strtotime($to_time.'T23:59:59'));
@@ -38,12 +49,26 @@ class tcCalendar {
 	}
 	
 	function monthtojson() {
+		$col_r = array();
 		$output =  "var tcevents = [\r\n";
 		foreach($this->events as $e) {
+			$parent_node_id = $e->attribute('parent_node_id');
 			
+			if (!array_key_exists('node_'.$parent_node_id, $col_r)) {
+				$parent_data = $e->fetchParent()->dataMap();
+				if (!array_key_exists($this->calcol_id,$parent_data)) {
+					$parent_col = '#000000';
+				} else {
+					$parent_col = $parent_data[$this->calcol_id]->content();
+				}
+				$col_r['node_'.$parent_node_id] = $parent_col;
+			} else {
+				$parent_col = $col_r['node_'.$parent_node_id];
+			}
 			$event_id = $e->attribute('node_id');
 			$objData = $e->dataMap();
 			$e_o = new stdClass();
+			$e_o->backgroundColor = '"'.$parent_col.'"';
 			$e_o->id = $event_id;
 			$e_o->title = '"'.addslashes($objData[$this->title_id]->content()).'"';
 			$e_o->start = $this->get_event_start($objData);
@@ -54,6 +79,7 @@ class tcCalendar {
 			}
 			$output .= preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n" ;
 		}
+		
 		$output .= "];\r\n";
 		return $output;
 	}
