@@ -70,7 +70,7 @@ class tcCalendar {
 			$e_o = new stdClass();
 			$e_o->backgroundColor = '"'.$parent_col.'"';
 			$e_o->id = $event_id;
-			$e_o->title = '"'.addslashes($objData[$this->title_id]->content()).'"';
+			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
 			$e_o->start = $this->get_event_start($objData);
 			$e_o->end = $this->get_event_end($objData);
 			$e_o->url = '"/' . $e->urlAlias(). '"';
@@ -93,7 +93,7 @@ class tcCalendar {
 		$date_from = $objData[$this->sd]->attribute('data_int');
 		$time_from = $objData[$this->st]->attribute('data_int');
 		
-		$out = "new Date(" . date('Y',$date_from) . ", " . date('m',$date_from) . ", " . date('d',$date_from) . ", " . date('G',$time_from) . ", " . date('i',$time_from) .")";
+		$out = "new Date(" . date('Y',$date_from) . ", " . date('m',$date_from) . ", " . date('j',$date_from) . ", " . date('G',$time_from) . ", " . date('i',$time_from) .")";
 		
 		return $out;
 			 
@@ -109,7 +109,7 @@ class tcCalendar {
 		
 		if ($time_to == 0 || date('His', $time_to) == '000000') return false;
 		
-		$out =  "new Date(".date('Y',$date_to).", ".date('m',$date_to).", ".date('d',$date_to).", ".date('i',$time_to).", ".date('s',$time_to).")";
+		$out =  "new Date(".date('Y',$date_to).", ".date('m',$date_to).", ".date('j',$date_to).", ".date('G',$time_to).", ".date('i',$time_to).")";
 		
 		return $out;
 				
