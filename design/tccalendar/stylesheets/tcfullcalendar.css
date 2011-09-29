@@ -1,4 +1,21 @@
+#tcfullcalendar {
+	font-size: 140%;
+}
+
 #tcfullcalendar #calendar {
 	width: 900px;
 	margin: 0 auto;
+}
+
+.legend_block {
+	float: left;
+	width: 32%;
+	margin-bottom: 1.5em;
+}
+
+.legend_color {
+	width: 20px;
+	height: 1em;
+	display: inline-block;
+	margin-right: 5px;
 }

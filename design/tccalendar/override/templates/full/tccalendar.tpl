@@ -28,7 +28,16 @@
 </script>
 {/literal}
 
-
 <div id='tcfullcalendar'>
+	<div id='legend'>
+		{if $node.data_map[ezini('ClassSettings', 'IsMasterAttributeIdentifier', 'tccalendar.ini')].content}
+			{def $cals = fetch(content, tree, hash(parent_node_id, 2, class_filter_type, 'include', class_filter_array, array($node.class_identifier), main_node_only, true()))}
+		{else}
+			{def $cals = array($node)}
+		{/if}
+		{foreach $cals as $c}
+			<div class='legend_block'><span style="background: {$c.data_map[ezini('ClassSettings', 'CalColorAttributeIdentifier', 'tccalendar.ini')].content}" class='legend_color'></span>{$c.name}</div>
+		{/foreach}
+	</div>
 	<div id='calendar'></div>
 </div>
