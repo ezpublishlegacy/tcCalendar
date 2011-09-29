@@ -1,9 +1,12 @@
+<!--[if lt IE 7]> <style type="text/css"> @import url({"stylesheets/tcfullcalendar_ie.css"|ezdesign(no)}); </style> <![endif]-->
+
 <div class="attribute-header">
     <h1>{$node.name|wash}</h1>
 </div>
 
 {ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css'))}
 {ezscript_require(array('fullcalendar.js'))}
+{def $vars = ezservervars()}
 
 {def $data_src = concat('/layout/set/monthtojson', $node.object.main_node.url_alias|ezroot(no))}
 

@@ -7,6 +7,10 @@
 	margin: 0 auto;
 }
 
+#legend {
+	clear:both;
+}
+
 .legend_block {
 	float: left;
 	width: 32%;

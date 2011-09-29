@@ -915,6 +915,7 @@ function EventManager(options, _sources) {
 			if (fetchID == currentFetchID) {
 				if (events) {
 					for (var i=0; i<events.length; i++) {
+						if (typeof events[i] == 'undefined') continue;
 						events[i].source = source;
 						normalizeEvent(events[i]);
 					}
@@ -1594,6 +1595,7 @@ fc.applyAll = applyAll;
 
 
 function exclEndDay(event) {
+	if (event == undefined) return false;
 	if (event.end) {
 		return _exclEndDay(event.end, event.allDay);
 	}else{
@@ -1631,6 +1633,7 @@ function sliceSegs(events, visEventEnds, start, end) {
 		segStart, segEnd,
 		isStart, isEnd;
 	for (i=0; i<len; i++) {
+		if (typeof events[i] == 'undefined') continue;
 		event = events[i];
 		eventStart = event.start;
 		eventEnd = visEventEnds[i];
@@ -3664,6 +3667,7 @@ function AgendaEventRenderer() {
 			dayEvents=[],
 			slotEvents=[];
 		for (i=0; i<len; i++) {
+			if (typeof events[i] == 'undefined') continue;
 			if (events[i].allDay) {
 				dayEvents.push(events[i]);
 			}else{
@@ -4309,6 +4313,7 @@ function View(element, calendar, viewName) {
 		eventsByID = {};
 		var i, len=events.length, event;
 		for (i=0; i<len; i++) {
+			if (typeof events[i] == 'undefined') continue;
 			event = events[i];
 			if (eventsByID[event._id]) {
 				eventsByID[event._id].push(event);
@@ -4447,6 +4452,7 @@ function View(element, calendar, viewName) {
 	function moveEvents(events, dayDelta, minuteDelta, allDay) {
 		minuteDelta = minuteDelta || 0;
 		for (var e, len=events.length, i=0; i<len; i++) {
+			if (typeof events[i] == 'undefined') continue;
 			e = events[i];
 			if (allDay !== undefined) {
 				e.allDay = allDay;
@@ -4463,6 +4469,7 @@ function View(element, calendar, viewName) {
 	function elongateEvents(events, dayDelta, minuteDelta) {
 		minuteDelta = minuteDelta || 0;
 		for (var e, len=events.length, i=0; i<len; i++) {
+			if (typeof events[i] == 'undefined') continue;
 			e = events[i];
 			e.end = addMinutes(addDays(eventEnd(e), dayDelta, true), minuteDelta);
 			normalizeEvent(e, options);
