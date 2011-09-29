@@ -52,6 +52,7 @@ class tcCalendar {
 		$col_r = array();
 		$output =  "var tcevents = [\r\n";
 		foreach($this->events as $e) {
+			$this->allDay = false;
 			$parent_node_id = $e->attribute('parent_node_id');
 			
 			if (!array_key_exists('node_'.$parent_node_id, $col_r)) {
@@ -73,6 +74,7 @@ class tcCalendar {
 			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
 			$e_o->start = $this->get_event_start($objData);
 			$e_o->end = $this->get_event_end($objData);
+			if ($this->allDay === false) $e_o->allDay = 'false';
 			$e_o->url = '"/' . $e->urlAlias(). '"';
 			$out = chr(123);
 			foreach($e_o as $k=>$v) {
@@ -88,7 +90,10 @@ class tcCalendar {
 	function get_event_start($objData) {
 		
 		if (!is_object($objData[$this->sd])) return false;
-		if (!is_object($objData[$this->st])) return false;
+		if (!is_object($objData[$this->st])) {
+			$this->allDay = true;
+			return false;
+		}
 					
 		$date_from = $objData[$this->sd]->attribute('data_int');
 		$time_from = $objData[$this->st]->attribute('data_int');
@@ -101,13 +106,22 @@ class tcCalendar {
 	
 	function get_event_end($objData) {
 	
-		if (!is_object($objData[$this->ed])) return false;
-		if (!is_object($objData[$this->et])) return false;
+		if (!is_object($objData[$this->ed])) {
+			$this->allDay = true;
+			return false;
+		}
+		if (!is_object($objData[$this->et])) {
+			$this->allDay = true;
+			return false;
+		}
 					
 		$date_to = $objData[$this->ed]->attribute('data_int');
 		$time_to = $objData[$this->et]->attribute('data_int');
 		
-		if ($time_to == 0 || date('His', $time_to) == '000000') return false;
+		if ($time_to == 0 || date('His', $time_to) == '000000') {
+			$this->allDay = true;
+			return false;
+		}
 		
 		$out =  "new Date(".date('Y',$date_to).", ". (floor(date('m',$date_to)) -1) .", ".date('d',$date_to).", ".date('H',$time_to).", ".date('i',$time_to).")";
 		
@@ -122,7 +136,7 @@ class tcCalendar {
 	var $st;
 	var $ed;
 	var $et;
-	
+	var $allDay;
 }
 
 ?>
