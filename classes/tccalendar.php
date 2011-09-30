@@ -95,10 +95,11 @@ class tcCalendar {
 			return false;
 		}
 					
-		$date_from = $objData[$this->sd]->attribute('data_int');
-		$time_from = $objData[$this->st]->attribute('data_int');
+		$date_from = $objData[$this->sd]->content();
+		$time_from = $objData[$this->st]->content();
+		if (!is_object($time_from)) $time_from = new eZDateTime($date_from);
 		
-		$out = "new Date(" . date('Y',$date_from) . ", " . (floor(date('m',$date_from)) -1) . ", " . date('d',$date_from) . ", " . date('H',$time_from) . ", " . date('i',$time_from) .")";
+		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month()) -1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . $time_from->minute() .")";
 		
 		return $out;
 			 
@@ -115,15 +116,16 @@ class tcCalendar {
 			return false;
 		}
 					
-		$date_to = $objData[$this->ed]->attribute('data_int');
-		$time_to = $objData[$this->et]->attribute('data_int');
+		$date_to = $objData[$this->ed]->content();
+		$time_to = $objData[$this->et]->content();
+		if (!is_object($time_to)) $time_to = new eZDateTime($date_to);
 		
-		if ($time_to == 0 || date('His', $time_to) == '000000') {
+		if (!is_object($time_to) || date('His', $time_to->timeStamp()) == '000000') {
 			$this->allDay = true;
 			return false;
 		}
 		
-		$out =  "new Date(".date('Y',$date_to).", ". (floor(date('m',$date_to)) -1) .", ".date('d',$date_to).", ".date('H',$time_to).", ".date('i',$time_to).")";
+		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month()) -1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . $time_to->minute() .")";
 		
 		return $out;
 				
