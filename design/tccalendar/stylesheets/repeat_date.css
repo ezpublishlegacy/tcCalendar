@@ -1,0 +1,13 @@
+.repeat_date div{
+	display:block;
+}
+
+#repeatevents .content div {
+	display: inline-block;
+	margin-right: 30px;
+	vertical-align: top;
+}
+
+.occurrences_input {
+	width: 40px;
+}

@@ -1,0 +1,25 @@
+<h1>Daily</h1>
+<div class="content">
+	<div>
+		<label>Repeat Every:</label>
+		<select name="repeat_every">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+		</select>
+		<span>days</span>
+	</div>
+	<div class='date'>
+		<label>Ends:</label>
+		<span class='rep_spacer'><input type="radio" name="ends" value="never" /> Never</span><br />
+		<span class='rep_spacer'><input type="radio" name="ends" value="after" /> After <input class='occurrences_input' length='4' type='text' value='' name='occurrences'/> occurrences</span><br />
+		<span class='rep_spacer'><input type="radio" name="ends" value="on" /> On <input length='10' type='text' value='' name='ends_on'/></span>
+	</div>
+</div>

@@ -1,0 +1,35 @@
+<h1>Weekly</h1>
+<div class="content">
+	<div>
+		<label>Repeat Every:</label>
+		<select name="repeat_every">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10">10</option>
+		</select>
+		<span>weeks</span>
+	</div>
+	<div>
+		<label>Repeat on:</label>
+		<input type="checkbox" name="day[0]" value="sunday" /><span>S</span>
+		<input type="checkbox" name="day[1]" value="monday" /><span>M</span>
+		<input type="checkbox" name="day[2]" value="tuesday" /><span>T</span>
+		<input type="checkbox" name="day[3]" value="wednesday" /><span>W</span>
+		<input type="checkbox" name="day[4]" value="thursday" /><span>TH</span>
+		<input type="checkbox" name="day[5]" value="friday" /><span>F</span>
+		<input type="checkbox" name="day[6]" value="saturday" /><span>S</span>
+	</div>
+	<div class='date'>
+		<label>Ends:</label>
+		<span class='rep_spacer'><input type="radio" name="ends" value="never" /> Never</span><br />
+		<span class='rep_spacer'><input type="radio" name="ends" value="after" /> After <input class='occurrences_input' length='4' type='text' value='' name='occurrences'/> occurrences</span><br />
+		<span class='rep_spacer'><input type="radio" name="ends" value="on" /> On <input length='10' type='text' value='' name='ends_on'/></span>
+	</div>
+</div>
