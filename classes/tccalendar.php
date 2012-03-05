@@ -73,7 +73,9 @@ class tcCalendar {
 			$e_o = new stdClass();
 			$e_o->backgroundColor = '"'.$parent_col.'"';
 			$e_o->id = $event_id;
-			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
+			if (is_object($objData[$this->title_id])) {
+				$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
+			}
 			$e_o->start = $this->get_event_start($objData);
 			$e_o->end = $this->get_event_end($objData);
 			if ($this->allDay === false) $e_o->allDay = 'false';

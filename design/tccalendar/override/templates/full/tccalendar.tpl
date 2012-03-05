@@ -24,9 +24,8 @@
 				right: 'month,agendaWeek,agendaDay'
 			},
 			events: tcevents
-			$('#tcfullcalendar').css('float', 'left');
 		});
-		
+		$('#tcfullcalendar').css('float', 'left');
 	});
 
 </script>
