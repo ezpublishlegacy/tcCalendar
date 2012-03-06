@@ -26,6 +26,8 @@ class tcCalendar {
 		$this->st = $ezphpicalendarini->variable( "ClassSettings", "StartTimeAttributeIdentifier");
 		$this->ed = $ezphpicalendarini->variable( "ClassSettings", "EndDateAttributeIdentifier");
 		$this->et = $ezphpicalendarini->variable( "ClassSettings", "EndTimeAttributeIdentifier");
+		$this->r = $ezphpicalendarini->variable( "ClassSettings", "EventClassRepeatAttributes");
+		$this->col_r=array();
 		
 		if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
 
@@ -51,44 +53,68 @@ class tcCalendar {
 	}
 	
 	function monthtojson() {
-		$col_r = array();
 		$output =  "var tcevents = [\r\n";
 		foreach($this->events as $e) {
-			$this->allDay = false;
-			$parent_node_id = $e->attribute('parent_node_id');
-			
-			if (!array_key_exists('node_'.$parent_node_id, $col_r)) {
-				$parent_data = $e->fetchParent()->dataMap();
-				if (!array_key_exists($this->calcol_id,$parent_data)) {
-					$parent_col = '#000000';
-				} else {
-					$parent_col = $parent_data[$this->calcol_id]->content();
+
+			$e_o = $this->eventtoobject($e);
+			$myclass_id = $e->object()->contentClass()->attribute('id');
+			$repeaters = $this->r;
+			$normal = true;
+			if (array_key_exists($myclass_id, $repeaters)) {
+				$dm = $e->dataMap();
+				if (array_key_exists($repeaters[$myclass_id], $dm) && $dm[$repeaters[$myclass_id]]->hasContent()) {
+					$normal = false;
+					$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
+					foreach ($start_times as $t) {
+						$mytime = new eZDateTime($t);
+						$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $mytime->hour() . ", " . $mytime->minute() .")";
+						$output .= $this->eventobjecttojson($e_o);
+					}
 				}
-				$col_r['node_'.$parent_node_id] = $parent_col;
-			} else {
-				$parent_col = $col_r['node_'.$parent_node_id];
-			}
-			$event_id = $e->attribute('node_id');
-			$objData = $e->dataMap();
-			$e_o = new stdClass();
-			$e_o->backgroundColor = '"'.$parent_col.'"';
-			$e_o->id = $event_id;
-			if (is_object($objData[$this->title_id])) {
-				$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
-			}
-			$e_o->start = $this->get_event_start($objData);
-			$e_o->end = $this->get_event_end($objData);
-			if ($this->allDay === false) $e_o->allDay = 'false';
-			$e_o->url = '"/' . $e->urlAlias(). '"';
-			$out = chr(123);
-			foreach($e_o as $k=>$v) {
-				if ($v) $out .= "$k: $v,\r\n";
-			}
-			$output .= preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n" ;
+			} 
+			if ($normal) $output .= $this->eventobjecttojson($e_o);
 		}
 		
 		$output .= "];\r\n";
 		return $output;
+	}
+	
+	function eventtoobject($e) {
+		$this->allDay = false;
+		$parent_node_id = $e->attribute('parent_node_id');
+		
+		if (!array_key_exists('node_'.$parent_node_id, $this->col_r)) {
+			$parent_data = $e->fetchParent()->dataMap();
+			if (!array_key_exists($this->calcol_id,$parent_data)) {
+				$parent_col = '#000000';
+			} else {
+				$parent_col = $parent_data[$this->calcol_id]->content();
+			}
+			$this->col_r['node_'.$parent_node_id] = $parent_col;
+		} else {
+			$parent_col = $this->col_r['node_'.$parent_node_id];
+		}
+		$event_id = $e->attribute('node_id');
+		$objData = $e->dataMap();
+		$e_o = new stdClass();
+		$e_o->backgroundColor = '"'.$parent_col.'"';
+		$e_o->id = $event_id;
+		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
+			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
+		}
+		$e_o->start = $this->get_event_start($objData);
+		$e_o->end = $this->get_event_end($objData);
+		if ($this->allDay === false) $e_o->allDay = 'false';
+		$e_o->url = '"/' . $e->urlAlias(). '"';
+		return $e_o;
+	}
+	
+	function eventobjecttojson($e_o) {
+		$out = chr(123);
+		foreach($e_o as $k=>$v) {
+			if ($v) $out .= "$k: $v,\r\n";
+		}
+		return preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n";
 	}
 	
 	function get_event_start($objData) {
@@ -142,6 +168,8 @@ class tcCalendar {
 	var $st;
 	var $ed;
 	var $et;
+	var $r;
+	var $col_r;
 	var $allDay;
 }
 

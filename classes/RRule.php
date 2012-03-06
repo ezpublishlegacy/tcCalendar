@@ -9,7 +9,7 @@
 * @license   http://gnu.org/copyleft/gpl.html GNU GPL v2
 */
 
-$ical_weekdays = array( 'SU' => 0, 'MO' => 1, 'TU' => 2, 'WE' => 3, 'TH' => 4, 'FR' => 5, 'SA' => 6 );
+$GLOBALS['ical_weekdays'] = array( 'SU' => 0, 'MO' => 1, 'TU' => 2, 'WE' => 3, 'TH' => 4, 'FR' => 5, 'SA' => 6 );
 
 /**
 * A Class for handling dates in iCalendar format.  We do make the simplifying assumption
@@ -161,8 +161,8 @@ class iCalDate {
   * @param string $weekstart The day of the week which is the first business day.
   */
   function SetWeekStart($weekstart) {
-    global $ical_weekdays;
-    $this->_wkst = $ical_weekdays[$weekstart];
+
+    $this->_wkst = $GLOBALS['ical_weekdays'][$weekstart];
   }
 
 
@@ -453,13 +453,13 @@ class iCalDate {
   * @return array An array of the day numbers for the week which meet the rule.
   */
   function GetWeekByDay($byday, $increasing = false) {
-    global $ical_weekdays;
+
 //    eZDebug::writeDebug( "RRule", " Applying BYDAY %s to week", $byday );
     $days = explode(',',$byday);
     $dow = date('w',$this->_epoch);
     $set = array();
     foreach( $days AS $k => $v ) {
-      $daynum = $ical_weekdays[$v];
+      $daynum = $GLOBALS['ical_weekdays'][$v];
       $dd = $this->_dd - $dow + $daynum;
       if ( $daynum < $this->_wkst ) $dd += 7;
       if ( $dd > $this->_dd || !$increasing ) $set[$dd] = $dd;
@@ -510,12 +510,12 @@ class iCalDate {
   * @return array An array of the day numbers for the month which meet the rule.
   */
   function &MonthDays($dow_first, $days_in_month, $dayspec) {
-    global $ical_weekdays;
+
 //    eZDebug::writeDebug( "RRule", "MonthDays: Getting days for '%s'. %d days starting on a %d", $dayspec, $days_in_month, $dow_first );
     $set = array();
     preg_match( '/([0-9-]*)(MO|TU|WE|TH|FR|SA|SU)/', $dayspec, $matches);
     $numeric = intval($matches[1]);
-    $dow = $ical_weekdays[$matches[2]];
+    $dow = $GLOBALS['ical_weekdays'][$matches[2]];
 
     $first_matching_day = 1 + ($dow - $dow_first);
     while ( $first_matching_day < 1 ) $first_matching_day += 7;

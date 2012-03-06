@@ -8,7 +8,7 @@ class eZRepeatEvent
     function eZRepeatEvent( $text, $ezcontentobjectattribute = false )
     {
         $this->text = $text;
-		$this->Attributes = $ezcontentobjectattribute;
+		if (is_object($ezcontentobjectattribute)) $this->end = $ezcontentobjectattribute->attribute('sort_key_int');
     }
 
     /*!
@@ -125,7 +125,7 @@ class eZRepeatEvent
 				foreach($day as $d) {
 					$gooddays[] = strtoupper(substr($d, 0, 2));
 				}
-				while (!array_key_exists(strtoupper(substr(date("D", $enddate), 0, 2)), $gooddays)) {
+				while (!in_array(strtoupper(substr(date("D", $enddate), 0, 2)), $gooddays)) {
 					$enddate = strtotime("-1 day",$enddate);
 				}
 				return $enddate;
@@ -155,7 +155,8 @@ class eZRepeatEvent
 		return -100;
 	}
 	
-	function get_timestamps($start_time, $end_time = FALSE) {
+	function get_timestamps($start_time = FALSE, $end_time = FALSE) {
+		if ($start_time === false) $start_time = $this->attribute('start_time');
 		$result = array();
 		$start = new iCalDate($start_time);
 		$RRule = new RRule($start, $this->text_to_rrule());
@@ -163,7 +164,7 @@ class eZRepeatEvent
 		$output = array();
 		while ($running) {
 			$next_date = $RRule->GetNext();
-			if (!$next_date || $next_date->_epoch > $this->Attributes->attribute('sort_key_int')) {
+			if (!$next_date || $next_date->_epoch > $this->end) {
 				$running = false;
 			} else {
 				$output[] = $next_date->_epoch;
@@ -191,7 +192,7 @@ class eZRepeatEvent
             }break;
             case "attributes" :
             {
-                return $this->Attributes;
+                return $this->attributes;
             }break;
             default:
             {
@@ -202,7 +203,7 @@ class eZRepeatEvent
     }
 
     public $text;
-	public $Attributes;
+	public $end;
 
 }
 
