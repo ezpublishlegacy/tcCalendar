@@ -36,6 +36,10 @@ html .fc,
 /* Header
 ------------------------------------------------------------------------*/
 
+table.fc-header {
+	clear: both;
+}
+
 .fc-header td {
 	white-space: nowrap;
 	}
