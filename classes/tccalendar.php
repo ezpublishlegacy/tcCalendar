@@ -67,7 +67,7 @@ class tcCalendar {
 					$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
 					foreach ($start_times as $t) {
 						$mytime = new eZDateTime($t);
-						$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $mytime->hour() . ", " . $mytime->minute() .")";
+						$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
 						$output .= $this->eventobjecttojson($e_o);
 					}
 				}
@@ -102,7 +102,7 @@ class tcCalendar {
 		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
 			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
 		}
-		$e_o->start = $this->get_event_start($objData);
+		$e_o->start = $this->get_event_start($objData, $e_o);
 		$e_o->end = $this->get_event_end($objData);
 		if ($this->allDay === false) $e_o->allDay = 'false';
 		$e_o->url = '"/' . $e->urlAlias(). '"';
@@ -117,7 +117,7 @@ class tcCalendar {
 		return preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n";
 	}
 	
-	function get_event_start($objData) {
+	function get_event_start($objData, $e_o) {
 		
 		if (!is_object($objData[$this->sd])) return false;
 		if (!is_object($objData[$this->st])) {
@@ -128,7 +128,8 @@ class tcCalendar {
 		$date_from = $objData[$this->sd]->content();
 		$time_from = $objData[$this->st]->content();
 		if (!is_object($time_from)) $time_from = new eZDateTime($date_from);
-		
+		$e_o->hour = $time_from->hour();
+		$e_o->minute = $time_from->minute();
 		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month()) -1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . $time_from->minute() .")";
 		
 		return $out;
