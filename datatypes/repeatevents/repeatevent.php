@@ -77,7 +77,7 @@ class eZRepeatEvent
 		if ($occurrences !='') {
 			$RRULE .= "COUNT=$occurrences;";
 		} elseif ($ends_on != '') {
-			$RRULE .= "UNTIL=" . strtotime(urldecode($ends_on)) . ";";
+			$RRULE .= "UNTIL=" . date("Ymj",strtotime(urldecode($ends_on))) ."T". date("His",$start_time) .";";
 		}
 		return trim($RRULE,";");
 	}
@@ -164,7 +164,7 @@ class eZRepeatEvent
 		$output = array();
 		while ($running) {
 			$next_date = $RRule->GetNext();
-			if (!$next_date || $next_date->_epoch > $this->end) {
+			if (!$next_date || $next_date->_epoch > ($this->end + (60*60*24) - 1)) {
 				$running = false;
 			} else {
 				$output[] = $next_date->_epoch;
