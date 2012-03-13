@@ -100,7 +100,7 @@ class eZRepeatEvent
 			}break;
 			case "mon-wed-fri" : {
 				$checkme = $start_time;
-				for ($i=0;$i++;$i<$occurrences) {
+				for ($i=0;$i<$occurrences;$i++) {
 					$checkme = strtotime("1 day",$checkme);
 					while (date("D", $checkme) != "Mon" && date("D", $checkme) != "Wed" && date("D", $checkme) != "Fri") {
 						$checkme = strtotime("1 day",$checkme);
@@ -110,7 +110,7 @@ class eZRepeatEvent
 			}break;
 			case "tues-thurs" : {
 				$checkme = $start_time;
-				for ($i=0;$i++;$i<$occurrences) {
+				for ($i=0;$i<$occurrences;$i++) {
 					$checkme = strtotime("1 day",$checkme);
 					while (date("D", $checkme) != "Tue" && date("D", $checkme) != "Thu") {
 						$checkme = strtotime("1 day",$checkme);
