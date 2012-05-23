@@ -63,12 +63,16 @@ class tcCalendar {
 			if (array_key_exists($myclass_id, $repeaters)) {
 				$dm = $e->dataMap();
 				if (array_key_exists($repeaters[$myclass_id], $dm) && $dm[$repeaters[$myclass_id]]->hasContent()) {
-					$normal = false;
-					$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
-					foreach ($start_times as $t) {
-						$mytime = new eZDateTime($t);
-						$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
-						$output .= $this->eventobjecttojson($e_o);
+					$mycontent = $dm[$repeaters[$myclass_id]]->content();
+					if (strpos($mycontent->text, 'repeats') !== false) {
+						$normal = false;
+						$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
+						foreach ($start_times as $t) {
+							$mytime = new eZDateTime($t);
+							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
+						
+							$output .= $this->eventobjecttojson($e_o);
+						}
 					}
 				}
 			} 
