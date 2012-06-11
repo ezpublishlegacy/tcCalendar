@@ -84,7 +84,22 @@ class repeatEventsType extends eZDataType
 		$classId = $objectAttribute->contentClassAttribute()->ContentClassID;
 		if (array_key_exists($classId, $EventClassStartDateAttributes)) {
 			$dm = $objectAttribute->object()->dataMap();
-			return $dm[$EventClassStartDateAttributes[$classId]]->attribute('data_int');
+			$contentObjectAttribute = eZContentObjectAttribute::fetchByIdentifier('event/'.$EventClassStartDateAttributes[$classId]);
+			$atts = eZContentObject::fetch($objectAttribute->attribute('contentobject_id'))->currentVersion()->contentObjectAttributes();
+			$myat = false;
+			foreach ($atts as $at) {
+				if ($at->ContentClassAttributeIdentifier == $EventClassStartDateAttributes[$classId]) {
+					$myat = $at;
+					break;
+				}
+			}
+			if ($myat) {
+				$http = eZHTTPTool::instance();
+				$imp = $myat->fetchInput( $http, 'ContentObjectAttribute' );
+				return $myat->attribute('data_int');
+			} else {
+				return time();
+			}	
 		} else {
 			return time();
 		}
