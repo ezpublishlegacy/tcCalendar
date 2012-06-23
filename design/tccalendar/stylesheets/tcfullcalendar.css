@@ -24,3 +24,8 @@
 	display: inline-block;
 	margin-right: 5px;
 }
+
+.caltoggle {
+	vertical-align: top;
+	height: 10px;
+}

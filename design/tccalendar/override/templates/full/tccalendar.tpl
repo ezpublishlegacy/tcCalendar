@@ -6,7 +6,8 @@
 
 {ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css'))}
 {ezscript_require(array('fullcalendar.js'))}
-{def $vars = ezservervars()}
+{def $vars = ezservervars()
+	 $mycol = ''}
 
 {def $data_src = concat('/layout/set/monthtojson', $node.object.main_node.url_alias|ezroot(no))}
 
@@ -39,7 +40,8 @@
 			{def $cals = array($node)}
 		{/if}
 		{foreach $cals as $c}
-			<div class='legend_block'><span style="background: {$c.data_map[ezini('ClassSettings', 'CalColorAttributeIdentifier', 'tccalendar.ini')].content}" class='legend_color'></span>{$c.name}</div>
+			{set $mycol = $c.data_map[ezini('ClassSettings', 'CalColorAttributeIdentifier', 'tccalendar.ini')].content|explode("#")|implode('')}
+			<div class='legend_block'><input id="caltog_{$mycol}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$mycol}', this.checked)" /><span style="background: #{$mycol}" class='legend_color'></span>{$c.name}</div>
 		{/foreach}
 	</div>
 	<div id='calendar'></div>

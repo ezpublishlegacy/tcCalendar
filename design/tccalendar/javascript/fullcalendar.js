@@ -1,3 +1,16 @@
+function togglecals() {
+	var cal = togglecals.arguments[0];
+	var val = togglecals.arguments[1];
+	$(".col_" + cal).css('visibility', val ? 'visible' : 'hidden');
+}
+
+(function($){if(!$){return;}$(function(){
+	$('.fc-content').bind("DOMSubtreeModified",function(){
+	  alert('woot');
+	})
+});})(typeof(jQuery)!=='undefined'?jQuery:null);
+
+
 /**
  * @preserve
  * FullCalendar v1.5.2
@@ -409,6 +422,15 @@ function Calendar(element, options, eventSources) {
 			ignoreWindowResize--;
 			currentView.trigger('viewDisplay', _element);
 		}
+		
+		$('.caltoggle').each(function(){
+			if (!this.checked) {
+				cal = $(this).attr('id').replace(/caltog_/,'');
+				$(".col_" + cal).css('visibility', 'hidden');
+			}
+		})
+		
+		
 	}
 	
 	
@@ -3888,7 +3910,7 @@ function AgendaEventRenderer() {
 		var url = event.url;
 		var skinCss = getSkinCss(event, opt);
 		var skinCssAttr = (skinCss ? " style='" + skinCss + "'" : '');
-		var classes = ['fc-event', 'fc-event-skin', 'fc-event-vert'];
+		var classes = ['fc-event', 'fc-event-skin', 'fc-event-vert', event.backgroundColor.replace(/#/, 'col_')];
 		if (isEventDraggable(event)) {
 			classes.push('fc-event-draggable');
 		}
@@ -4617,7 +4639,7 @@ function DayEventRenderer() {
 		for (i=0; i<segCnt; i++) {
 			seg = segs[i];
 			event = seg.event;
-			classes = ['fc-event', 'fc-event-skin', 'fc-event-hori'];
+			classes = ['fc-event', 'fc-event-skin', 'fc-event-hori', event.backgroundColor.replace(/#/, 'col_')];
 			if (isEventDraggable(event)) {
 				classes.push('fc-event-draggable');
 			}
