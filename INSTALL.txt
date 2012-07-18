@@ -1,0 +1,9 @@
+1) Install MyColorPicker extension (git@github.com:ThinkCreative/MyColorPicker.git)
+2) check (and reset if needed) extension file permissions, clear caches, regenerate autoloads.
+3) install from site admin package interface the tc_calendar and event classes (replace existing event) by importing package file tc_calendar_and_event-1.0-1.ezpkg (found in packages dir in this extension. You will need to copy this file only your local machine before import.)
+4) create settings/override/tccalendar.ini.append.php file (use tccalendar.ini file in this extension as a guide - fill in correct class info etc)
+5) activate extension by adding setting in settings/override/site.ini.append.php
+6) if your main siteaccess is not called site, you will need to create a symlink like the one that already exists in extension/tccalendar/settings/siteaccess that matches your siteaccess name and points to the chp dir.
+7) check (and reset if needed) extension file permissions, clear caches, regenerate autoloads.
+
+You should be now able to create tc_calendar objects, and event sub-items, and have the correct templates display them in the full view of your site.
