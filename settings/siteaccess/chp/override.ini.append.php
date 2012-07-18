@@ -8,4 +8,4 @@ Match[layout]=monthtojson
 Source=node/view/full.tpl
 MatchFile=full/tccalendar.tpl
 Subdir=templates
-Match[class_identifier]=calendar
+Match[class_identifier]=tc_calendar
