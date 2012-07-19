@@ -17,7 +17,7 @@ class repeatEventsType extends eZDataType
     */
 	function __construct()
 	{
-	    parent::__construct( self::DATA_TYPE_STRING, 'Repeat Events' );
+	    parent::__construct( self::DATA_TYPE_STRING, 'Repeat Events', array( 'serialize_supported' => true ) );
 	}
 
     /*!
