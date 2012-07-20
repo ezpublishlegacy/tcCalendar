@@ -1,9 +1,73 @@
-1) Install MyColorPicker extension (git@github.com:ThinkCreative/MyColorPicker.git)
-2) check (and reset if needed) extension file permissions, clear caches, regenerate autoloads.
-3) install from site admin package interface the tc_calendar and event classes (replace existing event) by importing package file tc_calendar_and_event-1.0-1.ezpkg (found in packages dir in this extension. You will need to copy this file only your local machine before import.)
-4) create settings/override/tccalendar.ini.append.php file (use tccalendar.ini file in this extension as a guide - fill in correct class info etc)
-5) activate extension by adding setting in settings/override/site.ini.append.php
-6) if your main siteaccess is not called site, you will need to create a symlink like the one that already exists in extension/tccalendar/settings/siteaccess that matches your siteaccess name and points to the chp dir.
-7) check (and reset if needed) extension file permissions, clear caches, regenerate autoloads.
+1.	Install MyColorPicker extension (git@github.com:ThinkCreative/MyColorPicker.git)
+	git submodule add git@github.com:ThinkCreative/MyColorPicker.git extension/mycolorpicker
+	git commit -m 'add "mycolorpicker" extension submodule'
 
-You should be now able to create tc_calendar objects, and event sub-items, and have the correct templates display them in the full view of your site.
+2.	Activate the extension by adding the setting in settings/override/site.ini.append.php
+	in the [ExtensionSettings] block, add the line
+	ActiveExtensions[]=mycolorpicker
+	git commit -m 'activate "mycolorpicker" extension'
+
+3.	Determine if the tccalendar extension directory exists for the site.
+	If it does not exist, install it. (git@github.com:ThinkCreative/tcCalendar.git)
+	git submodule add git@github.com:ThinkCreative/tcCalendar.git extension/tccalendar
+	git commit -m 'add "tccalendar" extension submodule'
+	
+	If it does exist, make sure it is up to date
+	cd extension/tccalendar, git status, git checkout master, git pull --rebase origin master
+	return to the site root directory
+	git commit -m 'update "tccalendar" extension'
+
+4.	Check (and reset if needed) extension file permissions
+	tcd -m
+	git submodule foreach --recursive "git config core.filemode false"
+
+5.	Activate the extension by adding the setting in settings/override/site.ini.append.php
+	in the [ExtensionSettings] block, add the line
+	ActiveExtensions[]=tccalendar
+	git commit -m 'activate "tccalendar" extension'
+
+6.	clear caches, regenerate autoloads
+	bin/php/ezcache.php --clear-all
+	bin/php/ezpgenerateautoloads.php
+	 
+7.	If you are going to proceed on the production server, deploy your changes
+	git push origin master
+	tcd -qmace --clear-all
+
+
+8.	Create the calendar and event classes (import the package tc_calendar_and_event-1.0-1.ezpkg)
+	copy the package file from the packages directory in the tccalendar extension to your local machine
+	access the admin interface from either production or your development server
+	navigate to the Setup tab and select Packages from the left menu
+	click the Import New Package button
+	click the Browse button and navigate to the tc_calendar_and_event-1.0-1.ezpkg  file on your local machine
+	click the Import Package button
+	if you are prompted to replace an existing class (calendar or event) choose replace
+	check to make sure you have both a Calendar and an Event class with the identifiers: tc_calendar and event
+	
+	
+9.	either:
+	if your main siteaccess is not named 'site', 
+	create a symlink like the one that already exists in extension/tccalendar/settings/siteaccess 
+	that matches your siteaccess name and points to the 'chp' dir.
+	
+	or:
+	in settings/<your siteaccess>/settings/override.ini.append.php
+	create these two template overrides:
+	
+		[monthtojson]
+		Source=node/view/full.tpl
+		MatchFile=full/monthtojson.tpl
+		Subdir=templates
+		Match[layout]=monthtojson
+		
+		[tccalendar]
+		Source=node/view/full.tpl
+		MatchFile=full/tccalendar.tpl
+		Subdir=templates
+		Match[class_identifier]=tc_calendar
+	
+10.	Create a test calendar object in the test area of the site
+	create one or more test events as subitems of the test calendar
+	view the test calendar on the frontend of the site to ensure that the templates are working as desired
+	drill into full view of one or more event to ensure that the templates are working as desired
