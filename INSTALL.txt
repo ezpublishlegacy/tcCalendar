@@ -52,7 +52,7 @@
 	that matches your siteaccess name and points to the 'chp' dir.
 	
 	or:
-	in settings/<your siteaccess>/settings/override.ini.append.php
+	in settings/siteaccess/<site>/override.ini.append.php
 	create these two template overrides:
 	
 		[monthtojson]
@@ -67,7 +67,28 @@
 		Subdir=templates
 		Match[class_identifier]=tc_calendar
 	
-10.	Create a test calendar object in the test area of the site
+10.	set up tccalendar.ini.append.php with event classIDs and attributeIDs
+	(use extension/tccalendar/settings/tccalendar.ini as an example)
+	
+	example:
+		<?php /*
+			[ClassSettings]
+			EventClassIds[]
+			EventClassIds[]=46
+			EventClassStartDateAttributes[46]=date_from
+			EventClassRepeatAttributes[46]=event_repeat
+			TitleAttributeIdentifier=name
+			StartDateAttributeIdentifier=date_from
+			StartTimeAttributeIdentifier=time_from
+			EndDateAttributeIdentifier=date_to
+			EndTimeAttributeIdentifier=time_to
+			CalColorAttributeIdentifier=cal_color
+			IsMasterAttributeIdentifier=aggregator
+		*/ ?>
+
+
+
+11.	Create a test calendar object in the test area of the site
 	create one or more test events as subitems of the test calendar
 	view the test calendar on the frontend of the site to ensure that the templates are working as desired
 	drill into full view of one or more event to ensure that the templates are working as desired
