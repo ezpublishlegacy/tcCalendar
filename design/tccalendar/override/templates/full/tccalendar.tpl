@@ -5,7 +5,7 @@
 </div>
 
 {ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css'))}
-{ezscript_require(array('fullcalendar.js', 'jquery.dataTables.min.js', 'overlib.js'))}
+{ezscript_require(array('fullcalendar.js', 'jquery.dataTables.min.js'))}
 
 {def $vars = ezservervars()
 	 $mycol = ''

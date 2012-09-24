@@ -1,4 +1,5 @@
 <?php
+
 $Module = array( 'name' => 'tccalendar',
                  'variable_params' => true );
 

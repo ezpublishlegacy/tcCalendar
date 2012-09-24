@@ -2,30 +2,59 @@
 	font-size: 140%;
 	width: 100%;
 }
-
 #tcfullcalendar #calendar {
 	width: 900px;
 	margin: 0 auto;
 }
-
 #legend {
 	clear:both;
 }
-
 .legend_block {
 	float: left;
 	width: 32%;
 	margin-bottom: 1.5em;
 }
-
 .legend_color {
 	width: 20px;
 	height: 1em;
 	display: inline-block;
 	margin-right: 5px;
 }
-
 .caltoggle {
 	vertical-align: top;
 	height: 10px;
+}
+#cal_search .extra_info {
+	display: none;
+}
+#cal_search {
+	display: none;
+}
+#tccal_search {
+	clear: both;
+}
+.cal_line {
+	display: inline;
+}
+#searchform {
+	margin-bottom: 1em;
+}
+#return_to_cal {
+	display: block;
+	margin-top: 1em;
+}
+.dataTables_filter {
+	display: none;
+}
+.sorting {
+	background: url('/extension/tccalendar/design/tccalendar/images/sort_both.png') no-repeat center right;
+}
+.sorting_asc {
+	background: url('/extension/tccalendar/design/tccalendar/images/sort_asc.png') no-repeat center right;
+}
+.sorting_desc {
+	background: url('/extension/tccalendar/design/tccalendar/images/sort_desc.png') no-repeat center right;
+}
+.fc-button-content {
+	font-family: HelveticaNeue, Arial, sans-serif
 }
