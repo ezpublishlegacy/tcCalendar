@@ -21,12 +21,14 @@ class tcCalendar {
 		$eventclasses = $ezphpicalendarini->variable( "ClassSettings", "EventClassIds" );
 		
 		$this->title_id = $ezphpicalendarini->variable( "ClassSettings", "TitleAttributeIdentifier");
+		$this->location_id = $ezphpicalendarini->variable( "ClassSettings", "LocationAttributeIdentifier");
 		$this->calcol_id = $ezphpicalendarini->variable( "ClassSettings", "CalColorAttributeIdentifier");
 		$this->sd = $ezphpicalendarini->variable( "ClassSettings", "StartDateAttributeIdentifier");
 		$this->st = $ezphpicalendarini->variable( "ClassSettings", "StartTimeAttributeIdentifier");
 		$this->ed = $ezphpicalendarini->variable( "ClassSettings", "EndDateAttributeIdentifier");
 		$this->et = $ezphpicalendarini->variable( "ClassSettings", "EndTimeAttributeIdentifier");
 		$this->r = $ezphpicalendarini->variable( "ClassSettings", "EventClassRepeatAttributes");
+		$this->HasPopup = $ezphpicalendarini->variable( "PopupOptions", "HasPopup");
 		$this->col_r=array();
 		
 		if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
@@ -106,10 +108,15 @@ class tcCalendar {
 		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
 			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
 		}
+		if (array_key_exists($this->location_id, $objData) && is_object($objData[$this->location_id])) {
+			$e_o->location = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->location_id]->content())).'"';
+		}
 		$e_o->start = $this->get_event_start($objData, $e_o);
 		$e_o->end = $this->get_event_end($objData);
 		if ($this->allDay === false) $e_o->allDay = 'false';
+		$e_o->HasPopup = ($this->HasPopup == enabled) ? 'true' : 'false';
 		$e_o->url = '"/' . $e->urlAlias(). '"';
+		
 		return $e_o;
 	}
 	

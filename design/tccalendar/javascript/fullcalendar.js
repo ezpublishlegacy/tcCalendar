@@ -1,3 +1,397 @@
+top.filterString = "";
+
+var dateFormat = function () {
+	var	token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
+		timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
+		timezoneClip = /[^-+\dA-Z]/g,
+		pad = function (val, len) {
+			val = String(val);
+			len = len || 2;
+			while (val.length < len) val = "0" + val;
+			return val;
+		};
+
+	// Regexes and supporting functions are cached through closure
+	return function (date, mask, utc) {
+		var dF = dateFormat;
+
+		// You can't provide utc if you skip other args (use the "UTC:" mask prefix)
+		if (arguments.length == 1 && Object.prototype.toString.call(date) == "[object String]" && !/\d/.test(date)) {
+			mask = date;
+			date = undefined;
+		}
+
+		// Passing date through Date applies Date.parse, if necessary
+		date = date ? new Date(date) : new Date;
+		if (isNaN(date)) throw SyntaxError("invalid date");
+
+		mask = String(dF.masks[mask] || mask || dF.masks["default"]);
+
+		// Allow setting the utc argument via the mask
+		if (mask.slice(0, 4) == "UTC:") {
+			mask = mask.slice(4);
+			utc = true;
+		}
+
+		var	_ = utc ? "getUTC" : "get",
+			d = date[_ + "Date"](),
+			D = date[_ + "Day"](),
+			m = date[_ + "Month"](),
+			y = date[_ + "FullYear"](),
+			H = date[_ + "Hours"](),
+			M = date[_ + "Minutes"](),
+			s = date[_ + "Seconds"](),
+			L = date[_ + "Milliseconds"](),
+			o = utc ? 0 : date.getTimezoneOffset(),
+			flags = {
+				d:    d,
+				dd:   pad(d),
+				ddd:  dF.i18n.dayNames[D],
+				dddd: dF.i18n.dayNames[D + 7],
+				m:    m + 1,
+				mm:   pad(m + 1),
+				mmm:  dF.i18n.monthNames[m],
+				mmmm: dF.i18n.monthNames[m + 12],
+				yy:   String(y).slice(2),
+				yyyy: y,
+				h:    H % 12 || 12,
+				hh:   pad(H % 12 || 12),
+				H:    H,
+				HH:   pad(H),
+				M:    M,
+				MM:   pad(M),
+				s:    s,
+				ss:   pad(s),
+				l:    pad(L, 3),
+				L:    pad(L > 99 ? Math.round(L / 10) : L),
+				t:    H < 12 ? "a"  : "p",
+				tt:   H < 12 ? "am" : "pm",
+				T:    H < 12 ? "A"  : "P",
+				TT:   H < 12 ? "AM" : "PM",
+				Z:    utc ? "UTC" : (String(date).match(timezone) || [""]).pop().replace(timezoneClip, ""),
+				o:    (o > 0 ? "-" : "+") + pad(Math.floor(Math.abs(o) / 60) * 100 + Math.abs(o) % 60, 4),
+				S:    ["th", "st", "nd", "rd"][d % 10 > 3 ? 0 : (d % 100 - d % 10 != 10) * d % 10]
+			};
+
+		return mask.replace(token, function ($0) {
+			return $0 in flags ? flags[$0] : $0.slice(1, $0.length - 1);
+		});
+	};
+}();
+
+// Some common format strings
+dateFormat.masks = {
+	"default":      "ddd mmm dd yyyy HH:MM:ss",
+	shortDate:      "m/d/yy",
+	mediumDate:     "mmm d, yyyy",
+	longDate:       "mmmm d, yyyy",
+	fullDate:       "dddd, mmmm d, yyyy",
+	shortTime:      "h:MM TT",
+	mediumTime:     "h:MM:ss TT",
+	longTime:       "h:MM:ss TT Z",
+	isoDate:        "yyyy-mm-dd",
+	isoTime:        "HH:MM:ss",
+	isoDateTime:    "yyyy-mm-dd'T'HH:MM:ss",
+	isoUtcDateTime: "UTC:yyyy-mm-dd'T'HH:MM:ss'Z'"
+};
+
+// Internationalization strings
+dateFormat.i18n = {
+	dayNames: [
+		"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
+		"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+	],
+	monthNames: [
+		"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+		"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"
+	]
+};
+
+// For convenience...
+Date.prototype.format = function (mask, utc) {
+	return dateFormat(this, mask, utc);
+};
+
+$(document).ready(function() {
+	
+	$('#calendar').fullCalendar({
+		editable: false,
+		header: {
+			left: 'prev,next today',
+			center: 'title',
+			right: 'month,agendaWeek,agendaDay'
+		},
+		events: tcevents
+	});
+	$('#tcfullcalendar').css('float', 'left');
+});
+
+function add_datatables() {
+	top.search_results_datatable = $('#cal_search_result table').dataTable({
+		"sPaginationType": "full_numbers",
+		"iDisplayLength": 25,
+		"aaSorting": [[ 2, "asc" ]]
+	});
+}
+
+function extra_filters() {
+	if (typeof top.filterString != 'undefined') {
+		top.search_results_datatable.fnFilter(top.filterString);
+	}
+}
+
+function get_callendar_html(searchform) {
+
+	var qstring = '/ajaxhelper/functionview/ezfModuleFunctionCollection/search/eventstable?';
+	var filter = new Array();
+	$(searchform).find('.sendme').each(function(){
+		if ($(this).val()!='all' && $(this).val()!='mm/dd/yyyy') {
+			if ($(this).attr('name') == 'to_date') {
+				filter.push("attr_date_from_dt:[0000-00-00T00:00:00Z TO " + $(this).val() + "T00:00:00Z]");
+			}
+			
+			else if ($(this).attr('name') == 'from_date') {
+				filter.push("(attr_date_to_dt:[" + $(this).val() + "T00:00:00Z TO *] OR attr_date_from_dt:[" + $(this).val() + "T00:00:00Z TO *])");
+			}
+			
+			else qstring += $(this).attr('name') + '=' + URLEncode($(this).val()) + '&';
+		}
+		
+	});
+	
+	$(searchform).find('.filterme').each(function(){
+		if ($(this).val()!='all' && $(this).val()!='') {
+			top.filterString += ' ' + $(this).val();
+		}
+		
+	});
+	
+	if (filter.length > 0) qstring +='filters=' + URLEncode(serialize(filter))
+	$('#cal_search_result').load(qstring, function(){add_datatables();extra_filters();})
+	if ($("#cal_search").css('display') == 'none') $('#cal_search, #calendar').toggle();
+	
+}
+
+if (typeof URLEncode == 'undefined') {
+
+	function URLEncode(plaintext)
+	{
+		// The Javascript escape and unescape functions do not correspond
+		// with what browsers actually do...
+		var SAFECHARS = "0123456789" +					// Numeric
+						"ABCDEFGHIJKLMNOPQRSTUVWXYZ" +	// Alphabetic
+						"abcdefghijklmnopqrstuvwxyz" +
+						"-_.!~*'()";					// RFC2396 Mark characters
+		var HEX = "0123456789ABCDEF";
+
+		var encoded = "";
+		for (var i = 0; i < plaintext.length; i++ ) {
+			var ch = plaintext.charAt(i);
+		    if (ch == " ") {
+			    encoded += "+";				// x-www-urlencoded, rather than %20
+			} else if (SAFECHARS.indexOf(ch) != -1) {
+			    encoded += ch;
+			} else {
+			    var charCode = ch.charCodeAt(0);
+				if (charCode > 255) {
+				    encoded += ch;
+				} else {
+					encoded += "%";
+					encoded += HEX.charAt((charCode >> 4) & 0xF);
+					encoded += HEX.charAt(charCode & 0xF);
+				}
+			}
+		} // for
+
+		return encoded;
+	};
+
+}
+
+if (typeof serialize == 'undefined') {
+	
+	function serialize (mixed_value) {
+	    // http://kevin.vanzonneveld.net
+	    // +   original by: Arpad Ray (mailto:arpad@php.net)
+	    // +   improved by: Dino
+	    // +   bugfixed by: Andrej Pavlovic
+	    // +   bugfixed by: Garagoth
+	    // +      input by: DtTvB (http://dt.in.th/2008-09-16.string-length-in-bytes.html)
+	    // +   bugfixed by: Russell Walker (http://www.nbill.co.uk/)
+	    // +   bugfixed by: Jamie Beck (http://www.terabit.ca/)
+	    // +      input by: Martin (http://www.erlenwiese.de/)
+	    // +   bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net/)
+	    // +   improved by: Le Torbi (http://www.letorbi.de/)
+	    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net/)
+	    // +   bugfixed by: Ben (http://benblume.co.uk/)
+	    // %          note: We feel the main purpose of this function should be to ease the transport of data between php & js
+	    // %          note: Aiming for PHP-compatibility, we have to translate objects to arrays
+	    // *     example 1: serialize(['Kevin', 'van', 'Zonneveld']);
+	    // *     returns 1: 'a:3:{i:0;s:5:"Kevin";i:1;s:3:"van";i:2;s:9:"Zonneveld";}'
+	    // *     example 2: serialize({firstName: 'Kevin', midName: 'van', surName: 'Zonneveld'});
+	    // *     returns 2: 'a:3:{s:9:"firstName";s:5:"Kevin";s:7:"midName";s:3:"van";s:7:"surName";s:9:"Zonneveld";}'
+	    var val, key, okey, 
+	        ktype = '', vals = '', count = 0, 
+	        _utf8Size = function (str) {
+	            var size = 0,
+	                i = 0,
+	                l = str.length,
+	                code = '';
+	            for (i = 0; i < l; i++) {
+	                code = str.charCodeAt(i);
+	                if (code < 0x0080) {
+	                    size += 1;
+	                }
+	                else if (code < 0x0800) {
+	                    size += 2;
+	                }
+	                else {
+	                    size += 3;
+	                }
+	            }
+	            return size;
+	        },
+	        _getType = function (inp) {
+	            var match, key, cons, types, type = typeof inp;
+
+	            if (type === 'object' && !inp) {
+	                return 'null';
+	            }
+	            if (type === 'object') {
+	                if (!inp.constructor) {
+	                    return 'object';
+	                }
+	                cons = inp.constructor.toString();
+	                match = cons.match(/(\w+)\(/);
+	                if (match) {
+	                    cons = match[1].toLowerCase();
+	                }
+	                types = ['boolean', 'number', 'string', 'array'];
+	                for (key in types) {
+	                    if (cons == types[key]) {
+	                        type = types[key];
+	                        break;
+	                    }
+	                }
+	            }
+	            return type;
+	        },
+	        type = _getType(mixed_value)
+	    ;
+
+	    switch (type) {
+	        case 'function':
+	            val = '';
+	            break;
+	        case 'boolean':
+	            val = 'b:' + (mixed_value ? '1' : '0');
+	            break;
+	        case 'number':
+	            val = (Math.round(mixed_value) == mixed_value ? 'i' : 'd') + ':' + mixed_value;
+	            break;
+	        case 'string':
+	            val = 's:' + _utf8Size(mixed_value) + ':"' + mixed_value + '"';
+	            break;
+	        case 'array': case 'object':
+	            val = 'a';
+	    /*
+	                if (type == 'object') {
+	                    var objname = mixed_value.constructor.toString().match(/(\w+)\(\)/);
+	                    if (objname == undefined) {
+	                        return;
+	                    }
+	                    objname[1] = this.serialize(objname[1]);
+	                    val = 'O' + objname[1].substring(1, objname[1].length - 1);
+	                }
+	                */
+
+	            for (key in mixed_value) {
+	                if (mixed_value.hasOwnProperty(key)) {
+	                    ktype = _getType(mixed_value[key]);
+	                    if (ktype === 'function') {
+	                        continue;
+	                    }
+
+	                    okey = (key.match(/^[0-9]+$/) ? parseInt(key, 10) : key);
+	                    vals += this.serialize(okey) + this.serialize(mixed_value[key]);
+	                    count++;
+	                }
+	            }
+	            val += ':' + count + ':{' + vals + '}';
+	            break;
+	        case 'undefined':
+	            // Fall-through
+	        default:
+	            // if the JS object has a property which contains a null value, the string cannot be unserialized by PHP
+	            val = 'N';
+	            break;
+	    }
+	    if (type !== 'object' && type !== 'array') {
+	        val += ';';
+	    }
+	    return val;
+	}
+	
+}
+
+if (typeof utf8_encode == 'undefined') {
+	
+	function utf8_encode (argString) {
+	    // http://kevin.vanzonneveld.net
+	    // +   original by: Webtoolkit.info (http://www.webtoolkit.info/)
+	    // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	    // +   improved by: sowberry
+	    // +    tweaked by: Jack
+	    // +   bugfixed by: Onno Marsman
+	    // +   improved by: Yves Sucaet
+	    // +   bugfixed by: Onno Marsman
+	    // +   bugfixed by: Ulrich
+	    // +   bugfixed by: Rafal Kukawski
+	    // +   improved by: kirilloid
+	    // *     example 1: utf8_encode('Kevin van Zonneveld');
+	    // *     returns 1: 'Kevin van Zonneveld'
+
+	    if (argString === null || typeof argString === "undefined") {
+	        return "";
+	    }
+
+	    var string = (argString + ''); // .replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+	    var utftext = '',
+	        start, end, stringl = 0;
+
+	    start = end = 0;
+	    stringl = string.length;
+	    for (var n = 0; n < stringl; n++) {
+	        var c1 = string.charCodeAt(n);
+	        var enc = null;
+
+	        if (c1 < 128) {
+	            end++;
+	        } else if (c1 > 127 && c1 < 2048) {
+	            enc = String.fromCharCode((c1 >> 6) | 192, (c1 & 63) | 128);
+	        } else {
+	            enc = String.fromCharCode((c1 >> 12) | 224, ((c1 >> 6) & 63) | 128, (c1 & 63) | 128);
+	        }
+	        if (enc !== null) {
+	            if (end > start) {
+	                utftext += string.slice(start, end);
+	            }
+	            utftext += enc;
+	            start = end = n + 1;
+	        }
+	    }
+
+	    if (end > start) {
+	        utftext += string.slice(start, stringl);
+	    }
+
+	    return utftext;
+	}
+	
+}
+
+
+
 function togglecals() {
 	var cal = togglecals.arguments[0];
 	var val = togglecals.arguments[1];
@@ -6,7 +400,7 @@ function togglecals() {
 
 (function($){if(!$){return;}$(function(){
 	$('.fc-content').bind("DOMSubtreeModified",function(){
-	  alert('woot');
+	  //alert('woot');
 	})
 });})(typeof(jQuery)!=='undefined'?jQuery:null);
 
@@ -3929,6 +4323,8 @@ function AgendaEventRenderer() {
 		}else{
 			html += "div";
 		}
+		tmp_date = new Date(event.start);
+			if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
 		html +=
 			" class='" + classes.join(' ') + "'" +
 			" style='position:absolute;z-index:8;top:" + seg.top + "px;left:" + seg.left + "px;" + skinCss + "'" +
@@ -4677,6 +5073,8 @@ function DayEventRenderer() {
 			}else{
 				html += "<div";
 			}
+			tmp_date = new Date(event.start);
+			if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
 			html +=
 				" class='" + classes.join(' ') + "'" +
 				" style='position:absolute;z-index:8;left:"+left+"px;" + skinCss + "'" +
