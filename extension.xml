@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<software>
+	
+    <metadata>
+        <name>tcCalendar extension</name>
+        <version>1.3.0</version>
+        <info_url>git@github.com:ThinkCreative/tcCalendar.git</info_url>
+        <software>
+            <uses>
+                <name>jQuery</name>
+                <license>Dual licensed under the MIT and GPL licenses</license>
+                <copyright>Copyright (c) 2011 John Resig</copyright>
+                <info_url>http://jquery.com/</info_url>
+                <version>1.6.4</version>
+            </uses>
+        </software>
+    </metadata>
+
+    <dependencies>
+		<dependency>functionview git@github.com:ThinkCreative/functionview.git</dependency>
+		<dependency>MyColorPicker git@github.com:ThinkCreative/MyColorPicker.git</dependency>
+    </dependencies>
+
+</software>
