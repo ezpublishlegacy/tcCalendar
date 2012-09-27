@@ -142,7 +142,7 @@ function extra_filters() {
 
 function get_callendar_html(searchform) {
 
-	var qstring = '/ajaxhelper/functionview/ezfModuleFunctionCollection/search/eventstable?';
+	var qstring = '/functionview/output/ezfModuleFunctionCollection/search/eventstable?';
 	var filter = new Array();
 	$(searchform).find('.sendme').each(function(){
 		if ($(this).val()!='all' && $(this).val()!='mm/dd/yyyy') {

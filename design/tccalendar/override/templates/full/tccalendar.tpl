@@ -5,7 +5,7 @@
 </div>
 
 {ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css'))}
-{ezscript_require(array('fullcalendar.js', 'jquery.dataTables.min.js'))}
+{ezscript_require(array('fullcalendar.js', 'jquery.dataTables.min.js', 'overlib.js'))}
 
 {def $vars = ezservervars()
 	 $mycol = ''
@@ -15,6 +15,7 @@
 	 $CustomFilters = ezini('SearchSettings', 'CustomFilters', 'tccalendar.ini')
 	 $filter_options = array()
 	 $option_r = array()
+	 $event_classes = ezini('ClassSettings', 'EventClassIds', 'tccalendar.ini')
 }
 
 {literal}
@@ -23,7 +24,7 @@
 
 {/literal}
 
-<div id='tcfullcalendar'>
+<div id='tcfullcalendar' class='cal_nav_tab_long'>
 	<div id='legend'>
 		{if $node.data_map[ezini('ClassSettings', 'IsMasterAttributeIdentifier', 'tccalendar.ini')].content}
 			{def $cals = fetch(content, tree, hash(parent_node_id, 2, class_filter_type, 'include', class_filter_array, array($node.class_identifier), main_node_only, true()))}
@@ -39,13 +40,14 @@
 	<div id='tccal_search'>
 		<form id='searchform' name='searchform' onsubmit = "javascript: get_callendar_html(this); return false;">
 			<fieldset class='cal_s_1'><legend>Search Events</legend>
-			{if $has_date_range}<div class='cal_line'>
+			{if $has_date_range}<div class='cal_block'><div class='cal_line'>
 			<label>From </label><input class='sendme' type='date' value='mm/dd/yyyy' name='from_date' id='from_date'"/>
 			</div>
 			<div class='cal_line'>
 			<label>&nbsp;To </label><input class='sendme' type='date' value='mm/dd/yyyy' name='to_date' id='to_date'"/>
 			</div>
 			<div id="cal1Container" class="yui-calcontainer single" style="display: none"></div>
+			</div>
 			{/if}
 			<div class='cal_block'>
 			<label for='filters'>Filter By </label>
@@ -60,12 +62,14 @@
 				</select>
 			{/foreach}
 			</div>
+			<div class='cal_block'>
 			<input type="hidden" name="cpath" value=""/>
 			<input type="hidden" name="cal" value=""/>
 			<input type="hidden" name="getdate" value=""/>
-			<input type="hidden" name="classID" class='sendme' value='46' />
+			<input type="hidden" name="classID" class='sendme' value='{$event_classes|serialize}' />
 			<label for='query'>For </label><input type="text" size="18" name="query" class='sendme' value=""/>
 			<input id="search_events" type="submit" name="submit" value="Search"/>
+			</div>
 			</fieldset>
 		</form>
 	</div>

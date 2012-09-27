@@ -33,6 +33,10 @@
 #tccal_search {
 	clear: both;
 }
+#cal_search table {
+	width: 100%;
+	margin-bottom: 1em;
+}
 .cal_line {
 	display: inline;
 }
@@ -57,4 +61,10 @@
 }
 .fc-button-content {
 	font-family: HelveticaNeue, Arial, sans-serif
+}
+#overDiv table {
+    margin-bottom: 0px;
+}
+#overDiv table td {
+    padding: 4px;
 }
