@@ -14,7 +14,7 @@ class tcCalendar {
 
 		$cal_node_data = $cal_node->dataMap();
 		
-		$this->is_master = $cal_node_data[$is_master_id]->content();
+		$this->is_master = (array_key_exists($is_master_id, $cal_node_data)) ? $cal_node_data[$is_master_id]->content() : true;
 		
 		if ($this->is_master) $cal_id = 2;
 		
