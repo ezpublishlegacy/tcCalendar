@@ -1,4 +1,0 @@
-<?
-echo 'TEST';
-eZExecution::cleanExit();
-?>

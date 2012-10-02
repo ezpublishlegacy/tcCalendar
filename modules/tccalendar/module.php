@@ -4,10 +4,6 @@ $Module = array( 'name' => 'tccalendar',
 
 $ViewList = array();
 
-$ViewList['monthtojson'] = array(
-    'script' => 'monthtojson.php',
-    'params' => array( 'ParentNodeID') );
-
 $Language = array(
     'name'=> 'Language',
     'values'=> array(),

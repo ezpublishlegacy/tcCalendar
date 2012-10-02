@@ -7,16 +7,29 @@ class tcCalendar {
 		$ezphpicalendarini = eZINI::instance( 'tccalendar.ini' );
 		
 		$is_master_id = $ezphpicalendarini->variable( 'ClassSettings', 'IsMasterAttributeIdentifier' );
+		$is_agg_id = $ezphpicalendarini->variable( 'ClassSettings', 'IsAggregatorAttributeIdentifier' );
+		$cal_classes = $ezphpicalendarini->variable( 'ClassSettings', 'CalClassIds' );
 		
 		$this->node_id = $cal_id;
 
 		$cal_node = eZContentObjectTreeNode::fetch($cal_id);
 
 		$cal_node_data = $cal_node->dataMap();
-		
+				
 		$this->is_master = $cal_node_data[$is_master_id]->content();
+		$this->is_agg = $cal_node_data[$is_agg_id]->content();
 		
 		if ($this->is_master) $cal_id = 2;
+
+		else if ($this->is_agg) {
+			
+			foreach ($cal_node->object()->relatedContentObjectList(false, false, 0, false, array('AllRelations' => true)) as $rel_object) {
+				if (in_array($rel_object->contentClass()->ID, $cal_classes)) {
+					$cal_id = $rel_object->mainNodeID();
+					break;
+				}
+			}
+		}
 		
 		$eventclasses = $ezphpicalendarini->variable( "ClassSettings", "EventClassIds" );
 		
