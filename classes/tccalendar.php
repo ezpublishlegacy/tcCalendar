@@ -33,21 +33,26 @@ class tcCalendar {
 		
 		if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
 
-		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
+		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses, 'SortBy' => array(array('attribute', true, "event/".$this->sd),array('name', true)));
 		
 		
 		if (!$this->is_master) {
 			$params['Depth'] = 1;
 			$params['DepthOperator'] = 'eq';
 		}
-		
+
 		$attribute_filter = array();
-		if ($to_time != null) $attribute_filter[] = array("event/from_time", "<=", strtotime($to_time.'T23:59:59'));
-		if ($from_time != null) $attribute_filter[] = array("event/to_time", ">=", strtotime($from_time));
+		if ($to_time != null) {
+			$attribute_filter[] = array("event/".$this->sd, "between", array(0,strtotime($to_time.'T23:59:59')));
+		}
+		if ($from_time != null) {
+			$attribute_filter[] = array("event/".$this->ed, "not_between", array(1,strtotime($from_time)));
+			$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
+		}
 		if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
 
 		$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
-		
+		      
 		if (in_array($cal_node->object()->contentClass()->attribute('id'), $eventclasses) && $for_output) $events = array($cal_node);
 
 		$this->events = $events;
@@ -66,7 +71,7 @@ class tcCalendar {
 				$dm = $e->dataMap();
 				if (array_key_exists($repeaters[$myclass_id], $dm) && $dm[$repeaters[$myclass_id]]->hasContent()) {
 					$mycontent = $dm[$repeaters[$myclass_id]]->content();
-					if (strpos($mycontent->text, 'repeats') !== false) {
+					if (strpos($mycontent->text, 'repeats') !== false && strpos($mycontent->text, 'repeats=never') === false) {
 						$normal = false;
 						$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
 						foreach ($start_times as $t) {
@@ -78,10 +83,13 @@ class tcCalendar {
 					}
 				}
 			} 
-			if ($normal) $output .= $this->eventobjecttojson($e_o);
+			if ($normal) {
+				$output .= $this->eventobjecttojson($e_o);
+			}
 		}
 		
 		$output .= "];\r\n";
+		$output .= "var tc_cal_id = " . $this->node_id . ";";
 		return $output;
 	}
 	

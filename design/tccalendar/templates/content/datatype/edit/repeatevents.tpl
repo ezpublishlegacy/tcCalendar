@@ -3,7 +3,7 @@
 {ezscript_require(array('repeat_date.js'))}
 {ezcss_require(array('repeat_date.css'))}
 
-{def $repeats=first_set($attribute.data_text|explode('repeats=').1|explode('&').0, 'weekly')}
+{def $repeats=first_set($attribute.data_text|explode('repeats=').1|explode('&').0, 'never')}  
 
 <span id="repeatevents">
 <div id="ajaxcontent"></div>
@@ -17,7 +17,11 @@ $RepeatEvents.panel('repeats', {
 	'selected':'{/literal}{$repeats}{literal}',
 	'container':'#repeatevents',
 	'target':'#ajaxcontent',
-	'options':{
+	'options':{    
+		'never':{
+			'label':'Never',
+			'source':'/extension/tccalendar/design/tccalendar/javascript/include/never.html'
+		},
 		'daily':{
 			'label':'Daily',
 			'source':'/extension/tccalendar/design/tccalendar/javascript/include/daily.html'
