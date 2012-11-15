@@ -1,5 +1,3 @@
-top.filterString = "";
-
 var dateFormat = function () {
 	var	token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
 		timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
@@ -110,20 +108,23 @@ dateFormat.i18n = {
 // For convenience...
 Date.prototype.format = function (mask, utc) {
 	return dateFormat(this, mask, utc);
-};
+};    
 
-$(document).ready(function() {
-	
-	$('#calendar').fullCalendar({
+$(document).ready(function() {	
+   $('#calendar').fullCalendar({
 		editable: false,
 		header: {
 			left: 'prev,next today',
 			center: 'title',
-			right: 'month,agendaWeek,agendaDay'
+			right: 'month,agendaWeek,agendaDay,agendaUpcoming'
 		},
 		events: tcevents
 	});
 	$('#tcfullcalendar').css('float', 'left');
+	$('#tccal_search form').submit(function(e){
+		e.preventDefault();
+		$('#calendar').fullCalendar('set_searchfilter', this);
+	})
 });
 
 function add_datatables() {
@@ -132,12 +133,6 @@ function add_datatables() {
 		"iDisplayLength": 25,
 		"aaSorting": [[ 2, "asc" ]]
 	});
-}
-
-function extra_filters() {
-	if (typeof top.filterString != 'undefined') {
-		top.search_results_datatable.fnFilter(top.filterString);
-	}
 }
 
 function get_callendar_html(searchform) {
@@ -166,9 +161,171 @@ function get_callendar_html(searchform) {
 		
 	});
 	
-	if (filter.length > 0) qstring +='filters=' + URLEncode(serialize(filter))
-	$('#cal_search_result').load(qstring, function(){add_datatables();extra_filters();})
-	if ($("#cal_search").css('display') == 'none') $('#cal_search, #calendar').toggle();
+	if (filter.length > 0) qstring +='filters=' + URLEncode(serialize(filter))      
+	
+	$('#calendar').fullCalendar('changeView', 'agendaSearch', qstring);
+	
+} 
+
+if (typeof unserialize == 'undefined') {
+	
+	function unserialize (data) {
+	  // http://kevin.vanzonneveld.net
+	  // +     original by: Arpad Ray (mailto:arpad@php.net)
+	  // +     improved by: Pedro Tainha (http://www.pedrotainha.com)
+	  // +     bugfixed by: dptr1988
+	  // +      revised by: d3x
+	  // +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	  // +        input by: Brett Zamir (http://brett-zamir.me)
+	  // +     improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	  // +     improved by: Chris
+	  // +     improved by: James
+	  // +        input by: Martin (http://www.erlenwiese.de/)
+	  // +     bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	  // +     improved by: Le Torbi
+	  // +     input by: kilops
+	  // +     bugfixed by: Brett Zamir (http://brett-zamir.me)
+	  // +      input by: Jaroslaw Czarniak
+	  // %            note: We feel the main purpose of this function should be to ease the transport of data between php & js
+	  // %            note: Aiming for PHP-compatibility, we have to translate objects to arrays
+	  // *       example 1: unserialize('a:3:{i:0;s:5:"Kevin";i:1;s:3:"van";i:2;s:9:"Zonneveld";}');
+	  // *       returns 1: ['Kevin', 'van', 'Zonneveld']
+	  // *       example 2: unserialize('a:3:{s:9:"firstName";s:5:"Kevin";s:7:"midName";s:3:"van";s:7:"surName";s:9:"Zonneveld";}');
+	  // *       returns 2: {firstName: 'Kevin', midName: 'van', surName: 'Zonneveld'}
+	  var that = this,
+	    utf8Overhead = function (chr) {
+	      // http://phpjs.org/functions/unserialize:571#comment_95906
+	      var code = chr.charCodeAt(0);
+	      if (code < 0x0080) {
+	        return 0;
+	      }
+	      if (code < 0x0800) {
+	        return 1;
+	      }
+	      return 2;
+	    },
+	    error = function (type, msg, filename, line) {
+	      throw new that.window[type](msg, filename, line);
+	    },
+	    read_until = function (data, offset, stopchr) {
+	      var i = 2, buf = [], chr = data.slice(offset, offset + 1);
+
+	      while (chr != stopchr) {
+	        if ((i + offset) > data.length) {
+	          error('Error', 'Invalid');
+	        }
+	        buf.push(chr);
+	        chr = data.slice(offset + (i - 1), offset + i);
+	        i += 1;
+	      }
+	      return [buf.length, buf.join('')];
+	    },
+	    read_chrs = function (data, offset, length) {
+	      var i, chr, buf;
+
+	      buf = [];
+	      for (i = 0; i < length; i++) {
+	        chr = data.slice(offset + (i - 1), offset + i);
+	        buf.push(chr);
+	        length -= utf8Overhead(chr);
+	      }
+	      return [buf.length, buf.join('')];
+	    },
+	    _unserialize = function (data, offset) {
+	      var dtype, dataoffset, keyandchrs, keys, 
+	        readdata, readData, ccount, stringlength, 
+	        i, key, kprops, kchrs, vprops, vchrs, value,
+	        chrs = 0, 
+	        typeconvert = function (x) {
+	          return x;
+	        };
+
+	      if (!offset) {
+	        offset = 0;
+	      }
+	      dtype = (data.slice(offset, offset + 1)).toLowerCase();
+
+	      dataoffset = offset + 2;
+
+	      switch (dtype) {
+	        case 'i':
+	          typeconvert = function (x) {
+	            return parseInt(x, 10);
+	          };
+	          readData = read_until(data, dataoffset, ';');
+	          chrs = readData[0];
+	          readdata = readData[1];
+	          dataoffset += chrs + 1;
+	          break;
+	        case 'b':
+	          typeconvert = function (x) {
+	            return parseInt(x, 10) !== 0;
+	          };
+	          readData = read_until(data, dataoffset, ';');
+	          chrs = readData[0];
+	          readdata = readData[1];
+	          dataoffset += chrs + 1;
+	          break;
+	        case 'd':
+	          typeconvert = function (x) {
+	            return parseFloat(x);
+	          };
+	          readData = read_until(data, dataoffset, ';');
+	          chrs = readData[0];
+	          readdata = readData[1];
+	          dataoffset += chrs + 1;
+	          break;
+	        case 'n':
+	          readdata = null;
+	          break;
+	        case 's':
+	          ccount = read_until(data, dataoffset, ':');
+	          chrs = ccount[0];
+	          stringlength = ccount[1];
+	          dataoffset += chrs + 2;
+
+	          readData = read_chrs(data, dataoffset + 1, parseInt(stringlength, 10));
+	          chrs = readData[0];
+	          readdata = readData[1];
+	          dataoffset += chrs + 2;
+	          if (chrs != parseInt(stringlength, 10) && chrs != readdata.length) {
+	            error('SyntaxError', 'String length mismatch');
+	          }
+	          break;
+	        case 'a':
+	          readdata = {};
+
+	          keyandchrs = read_until(data, dataoffset, ':');
+	          chrs = keyandchrs[0];
+	          keys = keyandchrs[1];
+	          dataoffset += chrs + 2;
+
+	          for (i = 0; i < parseInt(keys, 10); i++) {
+	            kprops = _unserialize(data, dataoffset);
+	            kchrs = kprops[1];
+	            key = kprops[2];
+	            dataoffset += kchrs;
+
+	            vprops = _unserialize(data, dataoffset);
+	            vchrs = vprops[1];
+	            value = vprops[2];
+	            dataoffset += vchrs;
+
+	            readdata[key] = value;
+	          }
+
+	          dataoffset += 1;
+	          break;
+	        default:
+	          error('SyntaxError', 'Unknown / Unhandled data type(s): ' + dtype);
+	          break;
+	      }
+	      return [dtype, dataoffset - offset, typeconvert(readdata)];
+	    }
+	  ;
+
+	  return _unserialize((data + ''), 0)[2];
+	}
 	
 }
 
@@ -480,7 +637,8 @@ var defaults = {
 		today: 'today',
 		month: 'month',
 		week: 'week',
-		day: 'day'
+		day: 'day',
+		upcoming: 'upcoming'
 	},
 	
 	// jquery-ui theming
@@ -569,8 +727,7 @@ $.fn.fullCalendar = function(options) {
 		var calendar = new Calendar(element, options, eventSources);
 		element.data('fullCalendar', calendar); // TODO: look into memory leak implications
 		calendar.render();
-	});
-	
+	});  
 	
 	return this;
 	
@@ -587,7 +744,7 @@ function setDefaults(d) {
  
 function Calendar(element, options, eventSources) {
 	var t = this;
-	
+	t.filter = '';
 	
 	// exports
 	t.options = options;
@@ -613,6 +770,8 @@ function Calendar(element, options, eventSources) {
 	t.getView = getView;
 	t.option = option;
 	t.trigger = trigger;
+	t.searchfilter = false;
+	t.set_searchfilter = set_searchfilter; 
 	
 	
 	// imports
@@ -656,6 +815,27 @@ function Calendar(element, options, eventSources) {
 			markEventsDirty();
 			renderView(inc);
 		}
+	}       
+	
+	function set_searchfilter(eventform) { 
+		
+		t.searchfilter = {};
+		
+		$(searchform).find('.sendme').each(function(){
+			
+			if ($(this).val()!='all' && $(this).val()!='mm/dd/yyyy') { 
+				 
+				name = $(this).attr('name');
+				val = $(this).val();   
+				
+				t.searchfilter[name] = val;
+			
+			}
+
+		}); 
+		
+		changeView('agendaUpcoming');
+		
 	}
 	
 	
@@ -720,8 +900,9 @@ function Calendar(element, options, eventSources) {
 	
 	// TODO: improve view switching (still weird transition in IE, and FF has whiteout problem)
 	
-	function changeView(newViewName) {
-		if (!currentView || newViewName != currentView.name) {
+	function changeView(newViewName) {    
+		if (arguments.length > 1) this.filter = arguments[1];
+		if (!currentView || newViewName != currentView.name || newViewName == 'agendaSearch') {
 			ignoreWindowResize++; // because setMinHeight might change the height before render (and subsequently setSize) is reached
 
 			unselect();
@@ -2610,6 +2791,9 @@ function BasicView(element, calendar, viewName) {
 		updateCells(firstTime);
 	}
 	
+	function renderUpcoming(maxr, r, c, showNumbers) {
+	}
+	
 	
 	
 	function updateOptions() {
@@ -3136,6 +3320,160 @@ function BasicEventRenderer() {
 	}
 
 
+}        
+
+fcViews.agendaSearch = AgendaSearchView;
+
+function AgendaSearchView(element, calendar) {
+	var t = this;
+	
+	var date = new Date();
+	
+	t.setHeight = t.opt = t.setWidth = t.clearEvents = t.trigger = function(){};
+	
+	t.name = 'agendaSearch';
+	
+	SelectionManager.call(t);
+	
+	// exports
+	t.render = render;  
+	
+	t.element = $(".fc-view-agendaSearch"); 
+	
+	t.tm = calendar.option('theme') ? 'ui' : 'fc';       
+	
+	t.renderEvents = function() { 
+		
+		$('.' + t.tm + '-header-title').html("<h2>" + formatDate(this.start, "MMM dd") + " - " + formatDate(tmp, "MMM dd") + "</h2>");     
+		
+		function dasheddate(date) {
+			var upcoming_start_currentDate = date
+			var upcoming_start_day = upcoming_start_currentDate.getDate();
+			var upcoming_start_month = upcoming_start_currentDate.getMonth() + 1;
+			var upcoming_start_year = upcoming_start_currentDate.getFullYear();
+			return upcoming_start_day + "-" + upcoming_start_month + "-" + upcoming_start_year;
+		}
+		
+		if (calendar.filter) {
+			my_url = calendar.filter;
+			calendar.filter = false;
+			this.eventsDirty = true;
+		} else {
+		    my_url = "/tccalendar/upcoming/" + tc_cal_id + "/" + URLEncode(dasheddate(this.start)) + '/' + URLEncode(dasheddate(tmp));
+		}
+		
+		$(function(){
+			$.ajax({
+						'async':true,
+						'url': my_url,
+						'dataType':'html',
+						'success':function(data){
+							$("." + t.tm + "-view-agendaSearch").html(data);
+						}
+			})
+		})
+	}
+	
+	function render(date, delta) {
+   	
+		if (delta) {
+			addMonths(date, delta);
+		}
+		
+		tmp = cloneDate(date);
+		addMonths(tmp, 1); 
+		
+		this.start = date;
+		this.end = tmp;      
+
+	}
+	
+}
+
+fcViews.agendaUpcoming = AgendaUpcomingView;
+
+function AgendaUpcomingView(element, calendar) {
+	var t = this;
+	
+	var date = new Date();    
+	date.setHours(0,0,0,0);
+	var offset = 0;
+	
+	t.setHeight = t.opt = t.setWidth = t.clearEvents = t.trigger = function(){};
+	
+	t.name = 'agendaUpcoming';
+	
+	SelectionManager.call(t);
+	
+	// exports
+	t.render = render;  
+	
+	t.element = $(".fc-view-agendaUpcoming"); 
+	
+	t.tm = calendar.option('theme') ? 'ui' : 'fc';       
+	
+	t.renderEvents = function() { 
+		
+		$('.' + t.tm + '-header-title').html("<h2>Starting " + formatDate(this.start, "MMM dd") + "</h2>");     
+		
+		function dasheddate(date) {
+			var upcoming_start_currentDate = date
+			var upcoming_start_day = upcoming_start_currentDate.getDate();
+			var upcoming_start_month = upcoming_start_currentDate.getMonth() + 1;
+			var upcoming_start_year = upcoming_start_currentDate.getFullYear();
+			return upcoming_start_day + "-" + upcoming_start_month + "-" + upcoming_start_year;
+		}
+		
+		if (calendar.searchfilter) { 
+			my_url = $('#tccal_search form').attr('action') + '?';
+			for (i in calendar.searchfilter) {
+				if (typeof calendar.searchfilter[i] == 'string') {
+					my_url += i + '=' + URLEncode(calendar.searchfilter[i]) + '&';
+				}
+			}
+		} else {
+		    my_url = "/tccalendar/upcoming/" + tc_cal_id + "/" + URLEncode(dasheddate(this.start)) + '/' + URLEncode(dasheddate(tmp));
+		}
+		
+		my_url = my_url.replace(/&$/, '');
+		
+		$(function(){
+			$.ajax({
+						'async':true,
+						'url': my_url,
+						'dataType':'html',
+						'success':function(data){
+							$("." + t.tm + "-view-agendaUpcoming").html(data);
+						}
+			})
+		})
+	}
+	
+	function render(date, delta) {
+   	          
+		var today = new Date();   
+		today.setHours(0,0,0,0);
+		
+		if ((delta && date < today) || (delta == -1 && offset == 0)) {
+			addMonths(date, delta);
+		} else {
+			     
+			if (delta) {
+				offset = offset + (10*delta);
+			}
+			
+		}
+		
+		
+		
+		tmp = cloneDate(date);
+		addMonths(tmp, 1); 
+		
+		this.start = date;
+		this.end = tmp;      
+
+	}
+	
 }
 
 fcViews.agendaWeek = AgendaWeekView;
