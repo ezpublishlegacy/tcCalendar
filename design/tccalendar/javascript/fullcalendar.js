@@ -772,6 +772,7 @@ function Calendar(element, options, eventSources) {
 	t.trigger = trigger;
 	t.searchfilter = false;
 	t.set_searchfilter = set_searchfilter; 
+	t.set_searchfilter_upcoming = set_searchfilter_upcoming; 
 	
 	
 	// imports
@@ -821,14 +822,22 @@ function Calendar(element, options, eventSources) {
 		
 		t.searchfilter = {};
 		
-		$(searchform).find('.sendme').each(function(){
+		$(eventform).find('.sendme').each(function(){
 			
 			if ($(this).val()!='all' && $(this).val()!='mm/dd/yyyy') { 
 				 
 				name = $(this).attr('name');
 				val = $(this).val();   
 				
-				t.searchfilter[name] = val;
+				if (typeof t.searchfilter[name] ==  "undefined") {
+					t.searchfilter[name] = val;
+				} else {
+					if (typeof t.searchfilter[name] !=  "object") {
+						t.searchfilter[name] = [t.searchfilter[name], val];
+					} else {
+						t.searchfilter[name].push(val);
+					}
+				}
 			
 			}
 
@@ -836,6 +845,14 @@ function Calendar(element, options, eventSources) {
 		
 		changeView('agendaUpcoming');
 		
+	}
+	
+	function set_searchfilter_upcoming() { 
+		t.searchfilter = {};
+		t.searchfilter['filters'] = "(attr_date_to_dt:[2012-11-27T00:00:00Z TO *] OR attr_date_from_dt:[2012-11-27T00:00:00Z TO *]) AND (meta_contentclass_id_si:40 OR meta_contentclass_id_si:49)";
+		t.searchfilter['offset'] = 0;
+		t.searchfilter['limit'] = 10;
+		t.searchfilter['query'] = "";
 	}
 	
 	
@@ -2342,7 +2359,7 @@ function setOuterHeight(element, height, includeMargins) {
 }
 
 
-// TODO: curCSS has been deprecated (jQuery 1.4.3 - 10/16/2010)
+// TODO: css has been deprecated (jQuery 1.4.3 - 10/16/2010)
 
 
 function hsides(element, includeMargins) {
@@ -2351,20 +2368,20 @@ function hsides(element, includeMargins) {
 
 
 function hpadding(element) {
-	return (parseFloat($.curCSS(element[0], 'paddingLeft', true)) || 0) +
-	       (parseFloat($.curCSS(element[0], 'paddingRight', true)) || 0);
+	return (parseFloat($.css(element[0], 'paddingLeft', true)) || 0) +
+	       (parseFloat($.css(element[0], 'paddingRight', true)) || 0);
 }
 
 
 function hmargins(element) {
-	return (parseFloat($.curCSS(element[0], 'marginLeft', true)) || 0) +
-	       (parseFloat($.curCSS(element[0], 'marginRight', true)) || 0);
+	return (parseFloat($.css(element[0], 'marginLeft', true)) || 0) +
+	       (parseFloat($.css(element[0], 'marginRight', true)) || 0);
 }
 
 
 function hborders(element) {
-	return (parseFloat($.curCSS(element[0], 'borderLeftWidth', true)) || 0) +
-	       (parseFloat($.curCSS(element[0], 'borderRightWidth', true)) || 0);
+	return (parseFloat($.css(element[0], 'borderLeftWidth', true)) || 0) +
+	       (parseFloat($.css(element[0], 'borderRightWidth', true)) || 0);
 }
 
 
@@ -2374,20 +2391,20 @@ function vsides(element, includeMargins) {
 
 
 function vpadding(element) {
-	return (parseFloat($.curCSS(element[0], 'paddingTop', true)) || 0) +
-	       (parseFloat($.curCSS(element[0], 'paddingBottom', true)) || 0);
+	return (parseFloat($.css(element[0], 'paddingTop', true)) || 0) +
+	       (parseFloat($.css(element[0], 'paddingBottom', true)) || 0);
 }
 
 
 function vmargins(element) {
-	return (parseFloat($.curCSS(element[0], 'marginTop', true)) || 0) +
-	       (parseFloat($.curCSS(element[0], 'marginBottom', true)) || 0);
+	return (parseFloat($.css(element[0], 'marginTop', true)) || 0) +
+	       (parseFloat($.css(element[0], 'marginBottom', true)) || 0);
 }
 
 
 function vborders(element) {
-	return (parseFloat($.curCSS(element[0], 'borderTopWidth', true)) || 0) +
-	       (parseFloat($.curCSS(element[0], 'borderBottomWidth', true)) || 0);
+	return (parseFloat($.css(element[0], 'borderTopWidth', true)) || 0) +
+	       (parseFloat($.css(element[0], 'borderBottomWidth', true)) || 0);
 }
 
 
@@ -3416,23 +3433,26 @@ function AgendaUpcomingView(element, calendar) {
 		
 		$('.' + t.tm + '-header-title').html("<h2>Starting " + formatDate(this.start, "MMM dd") + "</h2>");     
 		
-		function dasheddate(date) {
-			var upcoming_start_currentDate = date
-			var upcoming_start_day = upcoming_start_currentDate.getDate();
-			var upcoming_start_month = upcoming_start_currentDate.getMonth() + 1;
-			var upcoming_start_year = upcoming_start_currentDate.getFullYear();
-			return upcoming_start_day + "-" + upcoming_start_month + "-" + upcoming_start_year;
+		if (!calendar.searchfilter) { 
+			calendar.set_searchfilter_upcoming.call();
 		}
-		
-		if (calendar.searchfilter) { 
-			my_url = $('#tccal_search form').attr('action') + '?';
-			for (i in calendar.searchfilter) {
-				if (typeof calendar.searchfilter[i] == 'string') {
-					my_url += i + '=' + URLEncode(calendar.searchfilter[i]) + '&';
-				}
+
+		my_url = $('#tccal_search form').attr('action') + '?';
+		for (i in calendar.searchfilter) {
+			if (typeof calendar.searchfilter[i] == 'string') {
+				my_url += i.replace(/\[\]/,'') + '=' + URLEncode(calendar.searchfilter[i]) + '&';
 			}
-		} else {
-		    my_url = "/tccalendar/upcoming/" + tc_cal_id + "/" + URLEncode(dasheddate(this.start)) + '/' + URLEncode(dasheddate(tmp));
+			if (typeof calendar.searchfilter[i] == 'number') {
+				my_url += i.replace(/\[\]/,'') + '=' + calendar.searchfilter[i] + '&';
+			}
+			if (typeof calendar.searchfilter[i] == 'object') {
+				ar_out = '';
+				for (ii in calendar.searchfilter[i]) {
+					ar_out += calendar.searchfilter[i][ii] + ' AND ';
+				}
+				ar_out = ar_out.replace(/ AND $/,'');
+				my_url += i.replace(/\[\]/,'') + '=' + ar_out + '&';
+			}
 		}
 		
 		my_url = my_url.replace(/&$/, '');
@@ -3454,17 +3474,36 @@ function AgendaUpcomingView(element, calendar) {
 		var today = new Date();   
 		today.setHours(0,0,0,0);
 		
+		function dasheddate(date) {
+			var upcoming_start_currentDate = date
+			var upcoming_start_day = upcoming_start_currentDate.getDate();
+			var upcoming_start_month = upcoming_start_currentDate.getMonth() + 1;
+			var upcoming_start_year = upcoming_start_currentDate.getFullYear();
+			return upcoming_start_year + "-" + upcoming_start_month + "-" + upcoming_start_day;
+		}
+		
 		if ((delta && date < today) || (delta == -1 && offset == 0)) {
-			addMonths(date, delta);
+			tmp = cloneDate(date);
+			addMonths(date, delta);	
+			matchme = new RegExp(dasheddate(tmp).replace(/\//g, "\/"),"g");
+			addme = dasheddate(date);
+			if (typeof calendar.searchfilter['filters[]'] == 'object') {
+				for (i in calendar.searchfilter['filters[]']) {
+					calendar.searchfilter['filters[]'][i] = calendar.searchfilter['filters[]'][i].replace(matchme, addme);
+				}
+			} else if (typeof calendar.searchfilter['filters[]'] == 'string') {
+				calendar.searchfilter['filters[]'] = calendar.searchfilter['filters[]'].replace(matchme, addme);
+			}
+			if (typeof calendar.searchfilter['filters'] == 'string') calendar.searchfilter['filters'] = calendar.searchfilter['filters'].replace(matchme, addme);
+			
 		} else {
 			     
 			if (delta) {
 				offset = offset + (10*delta);
+				calendar.searchfilter['offset'] = offset;
 			}
 			
 		}
-		
-		
 		
 		tmp = cloneDate(date);
 		addMonths(tmp, 1); 
