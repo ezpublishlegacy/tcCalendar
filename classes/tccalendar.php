@@ -64,6 +64,7 @@ class tcCalendar {
 		foreach($this->events as $e) {
 
 			$e_o = $this->eventtoobject($e);
+			if ($e_o === false) continue; 
 			$myclass_id = $e->object()->contentClass()->attribute('id');
 			$repeaters = $this->r;
 			$normal = true;
@@ -110,6 +111,7 @@ class tcCalendar {
 		}
 		$event_id = $e->attribute('node_id');
 		$objData = $e->dataMap();
+		if (array_key_exists($objData, 'hide_from_calendar') && $objData['hide_from_calendar']->content()) return false; 
 		$e_o = new stdClass();
 		if (class_exists('tcEventColorFetcher')) {
 			$e_o->backgroundColor = tcEventColorFetcher::fetchColor($e);
