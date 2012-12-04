@@ -111,7 +111,11 @@ class tcCalendar {
 		$event_id = $e->attribute('node_id');
 		$objData = $e->dataMap();
 		$e_o = new stdClass();
-		$e_o->backgroundColor = '"'.$parent_col.'"';
+		if (class_exists('tcEventColorFetcher')) {
+			$e_o->backgroundColor = tcEventColorFetcher::fetchColor($e);
+		} else {
+			$e_o->backgroundColor = '"'.$parent_col.'"';
+		}
 		$e_o->id = $event_id;
 		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
 			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';

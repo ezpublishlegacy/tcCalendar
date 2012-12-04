@@ -21,7 +21,7 @@
 		{foreach fetch( 'content', 'class_attribute', hash( 'attribute_id', 410 ) ).content.options as $c}
 		{set $cal_id = $c.name|preg_replace("/[^A-Za-z\s]/", "")|explode(" ")|implode("_")|downcase}
 		<div class='legend_block'>
-		<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /><span style="background: #{$cal_colors[$cal_id]}" class='legend_color'></span>{$c.name}
+		<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /> {$c.name}
 		</div>
 		{/foreach}
 	</div>
