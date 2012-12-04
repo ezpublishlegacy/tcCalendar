@@ -6,35 +6,44 @@
 	 $cal_id = ''
 	 $event_classes = ezini('ClassSettings', 'EventClassIds', 'tccalendar.ini')}
 		
-	<div class='legend' id='legend_categories'>
-		<h2>Categories</h2>
-		{foreach fetch( 'content', 'class_attribute', hash( 'attribute_id', 407 ) ).content.options as $c}
-		{set $cal_id = $c.name|preg_replace("/[^A-Za-z\s]/", "")|explode(" ")|implode("_")|downcase}
-		<div class='legend_block'>
-		<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /><span style="background: #{$cal_colors[$cal_id]}" class='legend_color'></span>{$c.name}
-		</div>
-		{/foreach}
-	</div>
-	
-	<div class='legend' id='legend_regions'>
-		<h2>Regions</h2>
-		{foreach fetch( 'content', 'class_attribute', hash( 'attribute_id', 410 ) ).content.options as $c}
-		{set $cal_id = $c.name|preg_replace("/[^A-Za-z\s]/", "")|explode(" ")|implode("_")|downcase}
-		<div class='legend_block'>
-		<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /> {$c.name}
-		</div>
-		{/foreach}
-	</div>
-	
-	<div class='legend' id='legend_type'>
-		<h2>Type</h2>
-		<div class='legend_block'>
-		<input id="caltog_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('all', this.checked)" />All Events
-		</div>
-		<div class='legend_block'>
-		<input id="caltog_signature" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('signature', this.checked)" />Signature Events
+<div id="tccal_search">
+    <div class="column six">
+        <div id="legend_categories" class="legend green">
+			<h2>Categories</h2>
+			{foreach fetch( 'content', 'class_attribute', hash( 'attribute_id', 407 ) ).content.options as $c}
+			{set $cal_id = $c.name|preg_replace("/[^A-Za-z\s]/", "")|explode(" ")|implode("_")|downcase}
+			<div class='legend_block'>
+			<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /><span style="background: #{$cal_colors[$cal_id]}" class='legend_color'></span>{$c.name}
+			</div>
+			{/foreach}
 		</div>
 	</div>
+
+
+    <div class="column four">
+        <div id="legend_regions" class="legend teal">
+			<h2>Regions</h2>
+			{foreach fetch( 'content', 'class_attribute', hash( 'attribute_id', 410 ) ).content.options as $c}
+			{set $cal_id = $c.name|preg_replace("/[^A-Za-z\s]/", "")|explode(" ")|implode("_")|downcase}
+			<div class='legend_block'>
+			<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /> {$c.name}
+			</div>
+			{/foreach}
+		</div>
+	</div>
+
+    <div class="column two">
+        <div id="legend_type" class="legend burgundy">
+			<h2>Type</h2>
+			<div class='legend_block'>
+			<input id="caltog_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('all', this.checked)" />All Events
+			</div>
+			<div class='legend_block'>
+			<input id="caltog_signature" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('signature', this.checked)" />Signature Events
+			</div>
+		</div>
+	</div>
+</div>
 
 
 <form id='searchform' name='searchform' onsubmit='search_pre_process(this)' action='/functionview/output/ezfModuleFunctionCollection/search/eventstable'>
