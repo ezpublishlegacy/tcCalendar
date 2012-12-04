@@ -111,7 +111,7 @@ class tcCalendar {
 		}
 		$event_id = $e->attribute('node_id');
 		$objData = $e->dataMap();
-		if (array_key_exists($objData, 'hide_from_calendar') && $objData['hide_from_calendar']->content()) return false; 
+		if (array_key_exists('hide_from_calendar', $objData) && $objData['hide_from_calendar']->content()) return false; 
 		$e_o = new stdClass();
 		if (class_exists('tcEventColorFetcher')) {
 			$e_o->backgroundColor = tcEventColorFetcher::fetchColor($e);
