@@ -16,8 +16,9 @@
 			<input id="tc_ev_cat_{$cal_id}" class="caltoggle" type="checkbox" onclick="togglecals('tc_ev_cat_{$cal_id}', this.checked)" /><span style="background: #{$cal_colors[$cal_id]}" class='legend_color'></span>{$c.name}
 			</div>
 			{/foreach}
+			<div class='legend_block'>
 			<input id="tc_ev_cat_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('tc_ev_cat_all', this.checked)" /> All
-			
+			</div>
 		</div>
 	</div>
 
@@ -31,7 +32,9 @@
 			<input id="tc_ev_reg_{$cal_id}" class="caltoggle" type="checkbox" onclick="togglecals('tc_ev_reg_{$cal_id}', this.checked)" /> {$c.name}
 			</div>
 			{/foreach}
+			<div class='legend_block'>
 			<input id="tc_ev_reg_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('tc_ev_reg_all', this.checked)" /> All Regions
+			</div>
 		</div>
 	</div>
 

@@ -1,3 +1,13 @@
+function new_equal_col_height(group){
+	var $tallest=0;
+	group.each(function(){
+		var obj=$(this);
+		if(obj.height()>$tallest){
+			$tallest=obj.height();
+		}   
+	}).height($tallest);
+}
+
 var dateFormat = function () {
 	var	token = /d{1,4}|m{1,4}|yy(?:yy)?|([HhMsTt])\1?|[LloSZ]|"[^"]*"|'[^']*'/g,
 		timezone = /\b(?:[PMCEA][SDP]T|(?:Pacific|Mountain|Central|Eastern|Atlantic) (?:Standard|Daylight|Prevailing) Time|(?:GMT|UTC)(?:[-+]\d{4})?)\b/g,
@@ -125,6 +135,7 @@ $(document).ready(function() {
 		e.preventDefault();
 		$('#calendar').fullCalendar('set_searchfilter', this);
 	})
+	new_equal_col_height($("#tccal_search .column .togblock"));
 });
 
 function add_datatables() {

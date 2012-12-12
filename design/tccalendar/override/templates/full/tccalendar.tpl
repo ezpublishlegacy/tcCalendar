@@ -4,7 +4,7 @@
     <h1>{$node.name|wash}</h1>
 </div>
 
-{ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css'))}
+{ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css', 'tcfullcalendar_extra.css'))}
 {ezscript_require(array('fullcalendar.js', 'jquery.dataTables.min.js', 'overlib.js'))}
 
 {def $vars = ezservervars()
