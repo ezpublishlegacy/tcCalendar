@@ -552,10 +552,41 @@ if (typeof utf8_encode == 'undefined') {
 function togglecals() {
 	var cal = togglecals.arguments[0];
 	var val = togglecals.arguments[1];
-	$(".col_" + cal).css('visibility', val ? 'visible' : 'hidden');
+	var master_match = cal.match(/[^_]*_[^_]*_[^_]*/)[0];
+	var addme = '';
+	var hideme = '';
+	$(".togblock").each(function(){
+		mycals = $(this).find('input.caltoggle');
+		var allclear = true;
+		var master = $(this).find('input[id*=_all]').get(0);
+		mycals.each(function(){
+			if ($(this).attr('checked') == 'checked' && $(this).attr('id').indexOf('_all') == -1) {
+				allclear = false;
+			} 
+		})
+		if (allclear) master.checked = true;
+		mycals.reverse().each(function(index){
+			my_id = $(this).attr('id');
+			my_id_match_r = my_id.match(/[^_]*_[^_]*_[^_]*/);
+			my_id_match = (my_id_match_r != null) ? my_id_match_r[0] : 'nomatch';
+			if (my_id.indexOf('_all') == -1 && my_id_match == master_match && val != 0 && cal.indexOf('_all') != -1  ) this.checked = 0;
+			if (my_id.indexOf('_all') != -1 && my_id_match == master_match && val != 0 && cal.indexOf('_all') == -1) this.checked = 0;
+			if (this.checked || master.checked) {
+				addme += "#calendar ."+my_id+",";
+			} else {
+				hideme += "#calendar ."+my_id+",";
+			}
+		})
+	})
+	addme = addme.replace(/,$/,'');
+	hideme = hideme.replace(/,$/,'');
+	$(addme).css('display', 'block');
+	$(hideme).css('display', 'none');
 }
 
 (function($){if(!$){return;}$(function(){
+	jQuery.fn.reverse = [].reverse;
+	
 	$('.fc-content').bind("DOMSubtreeModified",function(){
 	  //alert('woot');
 	})
@@ -4682,6 +4713,9 @@ function AgendaEventRenderer() {
 		var skinCss = getSkinCss(event, opt);
 		var skinCssAttr = (skinCss ? " style='" + skinCss + "'" : '');
 		var classes = ['fc-event', 'fc-event-skin', 'fc-event-vert', event.backgroundColor.replace(/#/, 'col_')];
+		for (ii=0;ii<event.classes.length;ii++) {
+			classes.push(event.classes[ii]);
+		}
 		if (isEventDraggable(event)) {
 			classes.push('fc-event-draggable');
 		}
@@ -5413,6 +5447,9 @@ function DayEventRenderer() {
 			seg = segs[i];
 			event = seg.event;
 			classes = ['fc-event', 'fc-event-skin', 'fc-event-hori', event.backgroundColor.replace(/#/, 'col_')];
+			for (ii=0;ii<event.classes.length;ii++) {
+				classes.push(event.classes[ii]);
+			}
 			if (isEventDraggable(event)) {
 				classes.push('fc-event-draggable');
 			}

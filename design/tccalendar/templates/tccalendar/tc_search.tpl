@@ -8,38 +8,42 @@
 		
 <div id="tccal_search">
     <div class="column six">
-        <div id="legend_categories" class="legend green">
+        <div id="legend_categories" class="togblock legend green tc_ev_cat">
 			<h2>Categories</h2>
 			{foreach fetch( 'content', 'class_attribute', hash( 'attribute_id', 407 ) ).content.options as $c}
 			{set $cal_id = $c.name|preg_replace("/[^A-Za-z\s]/", "")|explode(" ")|implode("_")|downcase}
 			<div class='legend_block'>
-			<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /><span style="background: #{$cal_colors[$cal_id]}" class='legend_color'></span>{$c.name}
+			<input id="tc_ev_cat_{$cal_id}" class="caltoggle" type="checkbox" onclick="togglecals('tc_ev_cat_{$cal_id}', this.checked)" /><span style="background: #{$cal_colors[$cal_id]}" class='legend_color'></span>{$c.name}
 			</div>
 			{/foreach}
+			<input id="tc_ev_cat_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('tc_ev_cat_all', this.checked)" /> All
+			
 		</div>
 	</div>
 
 
     <div class="column four">
-        <div id="legend_regions" class="legend teal">
+        <div id="legend_regions" class="togblock legend teal tc_ev_reg">
 			<h2>Regions</h2>
 			{foreach fetch( 'content', 'class_attribute', hash( 'attribute_id', 410 ) ).content.options as $c}
 			{set $cal_id = $c.name|preg_replace("/[^A-Za-z\s]/", "")|explode(" ")|implode("_")|downcase}
 			<div class='legend_block'>
-			<input id="caltog_{$cal_id}" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('{$cal_id}', this.checked)" /> {$c.name}
+			<input id="tc_ev_reg_{$cal_id}" class="caltoggle" type="checkbox" onclick="togglecals('tc_ev_reg_{$cal_id}', this.checked)" /> {$c.name}
 			</div>
 			{/foreach}
+			<input id="tc_ev_reg_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('tc_ev_reg_all', this.checked)" /> All Regions
 		</div>
 	</div>
 
     <div class="column two">
-        <div id="legend_type" class="legend burgundy">
+        <div id="legend_type" class="togblock legend burgundy tc_ev_sig">
 			<h2>Type</h2>
 			<div class='legend_block'>
-			<input id="caltog_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('all', this.checked)" />All Events
+			<input id="tc_ev_sig_1" class="caltoggle" type="checkbox" onclick="togglecals('tc_ev_sig_1', this.checked)" />Signature Events
 			</div>
+			<input style='display:none' id="tc_ev_sig_0" class="caltoggle" type="checkbox"/>
 			<div class='legend_block'>
-			<input id="caltog_signature" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('signature', this.checked)" />Signature Events
+			<input id="tc_ev_sig_all" class="caltoggle" type="checkbox" checked=1 onclick="togglecals('tc_ev_sig_all', this.checked)" />All Events
 			</div>
 		</div>
 	</div>
