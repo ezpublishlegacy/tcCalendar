@@ -873,17 +873,20 @@ function Calendar(element, options, eventSources) {
 			}
 
 		}); 
-		
+		t.searchfilter['sortBy'] = 'a:1:{s:17:"attr_date_from_dt";s:3:"asc";}';
 		changeView('agendaUpcoming');
 		
 	}
 	
 	function set_searchfilter_upcoming() { 
+		cur_date=new Date();
+		d_string=cur_date.getFullYear()+'-'+cur_date.getMonth()+'-'+cur_date.getDate()+'T00:00:00Z';
 		t.searchfilter = {};
-		t.searchfilter['filters'] = "(attr_date_to_dt:[2012-11-27T00:00:00Z TO *] OR attr_date_from_dt:[2012-11-27T00:00:00Z TO *]) AND (meta_contentclass_id_si:40 OR meta_contentclass_id_si:49)";
+		t.searchfilter['filters'] = "(attr_date_to_dt:["+d_string+" TO *] OR attr_date_from_dt:["+d_string+" TO *]) AND (meta_contentclass_id_si:40 OR meta_contentclass_id_si:49)";
 		t.searchfilter['offset'] = 0;
 		t.searchfilter['limit'] = 10;
 		t.searchfilter['query'] = "";
+		t.searchfilter['sortBy'] = 'a:1:{s:17:"attr_date_from_dt";s:3:"asc";}';
 	}
 	
 	
@@ -3487,6 +3490,8 @@ function AgendaUpcomingView(element, calendar) {
 		}
 		
 		my_url = my_url.replace(/&$/, '');
+		
+		my_url += "&fetchfrom=" + formatDate(this.start, "yyyy-MM-dd");
 		
 		$(function(){
 			$.ajax({
