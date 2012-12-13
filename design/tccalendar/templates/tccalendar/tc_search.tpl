@@ -6,7 +6,7 @@
 	 $cal_id = ''
 	 $event_classes = ezini('ClassSettings', 'EventClassIds', 'tccalendar.ini')}
 		
-<div id="tccal_search">
+<div id="tccal_search" class="row">
     <div class="column six">
         <div id="legend_categories" class="togblock legend green tc_ev_cat">
 			<h2>Categories</h2>
@@ -54,17 +54,21 @@
 
 
 <form id='searchform' name='searchform' onsubmit='search_pre_process(this)' action='/functionview/output/ezfModuleFunctionCollection/search/eventstable'>
-	<fieldset class='cal_s_1'><legend>Search Events</legend>
-	{if $has_date_range}<div class='cal_block'><div class='cal_line'>
-	<label>From </label><input class='procme' type='date' value='mm/dd/yyyy' name='filters[]' id='from_date_pl'/>
-	<input class='sendme' type='hidden' name='filters[]' id='from_date' value='mm/dd/yyyy'>
-	</div>
-	<div class='cal_line'>
-	<label>&nbsp;To </label><input class='procme' type='date' value='mm/dd/yyyy' name='filters[]' id='to_date_pl'/>
-	<input class='sendme' type='hidden' name='filters[]' id='to_date' value='mm/dd/yyyy'>
-	</div>
-	<div id="cal1Container" class="yui-calcontainer single" style="display: none"></div>
-	</div>
+	<fieldset class='cal_s_1'><!--<legend>Search Events</legend>-->
+	{if $has_date_range}
+		<div class='cal_block'>
+			<div class='cal_line'>
+				<label>From </label>
+				<input class='procme' type='date' value='mm/dd/yyyy' name='filters[]' id='from_date_pl'/>
+				<input class='sendme' type='hidden' name='filters[]' id='from_date' value='mm/dd/yyyy'>
+			</div>
+			<div class='cal_line'>
+				<label>&nbsp;To </label>
+				<input class='procme' type='date' value='mm/dd/yyyy' name='filters[]' id='to_date_pl'/>
+				<input class='sendme' type='hidden' name='filters[]' id='to_date' value='mm/dd/yyyy'>
+			</div>
+			<div id="cal1Container" class="yui-calcontainer single" style="display: none"></div>
+		</div>
 	{/if}
 	<div class='cal_block'>
 	<input type="hidden" name="cpath" value=""/> 
@@ -73,7 +77,7 @@
 	<input type="hidden" name="cal" value=""/>
 	<input type="hidden" name="getdate" value=""/>
 	<input type="hidden" name="filters[]" class='sendme' value='({foreach $event_classes as $e}meta_contentclass_id_si:{$e}{delimiter} OR {/delimiter}{/foreach})' />
-	<label for='query'>For </label><input type="text" size="18" name="query" class='sendme' value=""/>
+	<input type="text" size="18" name="query" class='sendme' placeholder="Filter Events" value=""/>
 	<input id="search_events" type="submit" name="submit" value="Search"/>
 	</div>
 	</fieldset>

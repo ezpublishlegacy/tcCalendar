@@ -1,7 +1,6 @@
 <!--[if lt IE 7]> <style type="text/css"> @import url({"stylesheets/tcfullcalendar_ie.css"|ezdesign(no)}); </style> <![endif]-->
 <div class="content medium-radius">
 <div class="attribute-header">
-    <h1>{$node.name|wash}</h1>
 </div>
 
 {ezcss_require(array('fullcalendar.css', 'tcfullcalendar.css', 'tcfullcalendar_extra.css'))}
