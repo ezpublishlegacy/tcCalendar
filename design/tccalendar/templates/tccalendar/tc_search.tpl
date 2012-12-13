@@ -78,7 +78,7 @@
 	<input type="hidden" name="getdate" value=""/>
 	<input type="hidden" name="filters[]" class='sendme' value='({foreach $event_classes as $e}meta_contentclass_id_si:{$e}{delimiter} OR {/delimiter}{/foreach})' />
 	<input type="text" size="18" name="query" class='sendme' placeholder="Filter Events" value=""/>
-	<input id="search_events" type="submit" name="submit" value="Search"/>
+	<input id="search_events" class="searchbutton" type="image" name="submit" alt="Search" src="/extension/site/design/site/images/search.png"/>
 	</div>
 	</fieldset>
 </form>
