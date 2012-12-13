@@ -2642,7 +2642,7 @@ function MonthView(element, calendar) {
 	
 	
 	function render(date, delta) {
-		if (delta = 999) delta = false; 
+		if (delta == 999) delta = false; 
 		if (delta) {
 			addMonths(date, delta);
 			date.setDate(1);
@@ -2695,7 +2695,7 @@ function BasicWeekView(element, calendar) {
 	
 	
 	function render(date, delta) {
-		if (delta = 999) delta = false;
+		if (delta == 999) delta = false;
 		if (delta) {
 			addDays(date, delta * 7);
 		}
@@ -2745,7 +2745,7 @@ function BasicDayView(element, calendar) {
 	
 	
 	function render(date, delta) {
-		if (delta = 999) delta = false;
+		if (delta == 999) delta = false;
 		if (delta) {
 			addDays(date, delta);
 			if (!opt('weekends')) {
@@ -3443,7 +3443,7 @@ function AgendaSearchView(element, calendar) {
 	}
 	
 	function render(date, delta) {
-   		if (delta = 999) delta = false;
+   		if (delta == 999) delta = false;
 		if (delta) {
 			addMonths(date, delta);
 		}
@@ -3605,7 +3605,7 @@ function AgendaWeekView(element, calendar) {
 	
 	
 	function render(date, delta) {
-		if (delta = 999) delta = false;
+		if (delta == 999) delta = false;
 		if (delta) {
 			addDays(date, delta * 7);
 		}
@@ -3652,7 +3652,7 @@ function AgendaDayView(element, calendar) {
 	
 	
 	function render(date, delta) {
-		if (delta = 999) delta = false;
+		if (delta == 999) delta = false;
 		if (delta) {
 			addDays(date, delta);
 			if (!opt('weekends')) {
