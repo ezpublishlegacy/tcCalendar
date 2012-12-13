@@ -891,12 +891,15 @@ function Calendar(element, options, eventSources) {
 	
 	function set_searchfilter_upcoming() { 
 		cur_date=new Date();
-		d_string=cur_date.getFullYear()+'-'+cur_date.getMonth()+'-'+cur_date.getDate()+'T00:00:00Z';
+		tmp = cloneDate(cur_date);
+		addMonths(tmp, 1);
+		d_string=cur_date.getFullYear()+'-'+(cur_date.getMonth()+1)+'-'+cur_date.getDate()+'T00:00:00Z';
+		d_string2=tmp.getFullYear()+'-'+(tmp.getMonth() +1)+'-'+tmp.getDate()+'T00:00:00Z';
 		t.searchfilter = {};
-		t.searchfilter['filters'] = "(attr_date_to_dt:["+d_string+" TO *] OR attr_date_from_dt:["+d_string+" TO *]) AND (meta_contentclass_id_si:40 OR meta_contentclass_id_si:49)";
-		t.searchfilter['offset'] = 0;
-		t.searchfilter['limit'] = 10;
+		t.searchfilter['filters'] = "(attr_date_to_dt:["+d_string+" TO *] OR attr_date_from_dt:["+d_string+" TO *]) AND (meta_contentclass_id_si:40 OR meta_contentclass_id_si:49) AND attr_date_from_dt:[0000-00-00T00:00:00Z TO "+d_string2+"]";
 		t.searchfilter['query'] = "";
+		t.searchfilter['offset'] = 0;
+		t.searchfilter['limit'] = 999999;
 		t.searchfilter['sortBy'] = 'a:1:{s:17:"attr_date_from_dt";s:3:"asc";}';
 	}
 	
@@ -3476,7 +3479,7 @@ function AgendaUpcomingView(element, calendar) {
 	
 	t.renderEvents = function() { 
 		
-		$('.' + t.tm + '-header-title').html("<h2>Starting " + formatDate(this.start, "MMM dd") + "</h2>");     
+		$('.' + t.tm + '-header-title').html("<h2>" + formatDate(this.start, "MMM dd") + " - " + formatDate(this.end, "MMM dd") + "</h2>");     
 		
 		if (!calendar.searchfilter) { 
 			calendar.set_searchfilter_upcoming.call();
@@ -3518,8 +3521,8 @@ function AgendaUpcomingView(element, calendar) {
 	
 	function render(date, delta) {
    	          
-		var today = new Date();   
-		today.setHours(0,0,0,0);
+		//var today = new Date();   
+		//today.setHours(0,0,0,0);
 		
 		function dasheddate(date) {
 			var upcoming_start_currentDate = date
@@ -3529,34 +3532,45 @@ function AgendaUpcomingView(element, calendar) {
 			return upcoming_start_year + "-" + upcoming_start_month + "-" + upcoming_start_day;
 		}
 		
-		if ((delta && date < today) || (delta == -1 && offset == 0)) {
-			tmp = cloneDate(date);
+		//if ((delta && date < today) || (delta == -1 && offset == 0)) {
+			origdate = cloneDate(date);
+			origplusone = cloneDate(date);
+			addMonths(origplusone, 1);	
 			addMonths(date, delta);	
-			matchme = new RegExp(dasheddate(tmp).replace(/\//g, "\/"),"g");
-			addme = dasheddate(date);
-			if (typeof calendar.searchfilter['filters[]'] == 'object') {
-				for (i in calendar.searchfilter['filters[]']) {
-					calendar.searchfilter['filters[]'][i] = calendar.searchfilter['filters[]'][i].replace(matchme, addme);
+			onemonthon = cloneDate(date);
+			addMonths(onemonthon, 1); 
+			
+			loopme = (delta > 0) ? new Array(origdate, date, origplusone, onemonthon) : new Array(origplusone, onemonthon, origdate, date);
+			
+			while (loopme.length > 0) {
+				
+				adddate = loopme.pop();
+				matchdate = loopme.pop();
+				
+				matchme = new RegExp(dasheddate(matchdate).replace(/\//g, "\/"),"g");
+				addme = dasheddate(adddate);
+
+				if (typeof calendar.searchfilter['filters[]'] == 'object') {
+					for (i in calendar.searchfilter['filters[]']) {
+						calendar.searchfilter['filters[]'][i] = calendar.searchfilter['filters[]'][i].replace(matchme, addme);
+					}
+				} else if (typeof calendar.searchfilter['filters[]'] == 'string') {
+					calendar.searchfilter['filters[]'] = calendar.searchfilter['filters[]'].replace(matchme, addme);
 				}
-			} else if (typeof calendar.searchfilter['filters[]'] == 'string') {
-				calendar.searchfilter['filters[]'] = calendar.searchfilter['filters[]'].replace(matchme, addme);
-			}
-			if (typeof calendar.searchfilter['filters'] == 'string') calendar.searchfilter['filters'] = calendar.searchfilter['filters'].replace(matchme, addme);
+				if (typeof calendar.searchfilter['filters'] == 'string') calendar.searchfilter['filters'] = calendar.searchfilter['filters'].replace(matchme, addme);
+				
+			} 
+
 			
-		} else {
-			     
-			if (delta) {
-				offset = offset + (10*delta);
-				calendar.searchfilter['offset'] = offset;
-			}
-			
-		}
-		
-		tmp = cloneDate(date);
-		addMonths(tmp, 1); 
+		//} else {	     
+		//	if (delta) {
+		//		offset = offset + (10*delta);
+		//		calendar.searchfilter['offset'] = offset;
+		//	}
+		//}
 		
 		this.start = date;
-		this.end = tmp;      
+		this.end = onemonthon;      
 
 	}
 	

@@ -83,12 +83,11 @@
 function search_pre_process(searchform) {
 	$(searchform).find('.procme').each(function(){
 		if ($(this).val()!='all' && $(this).val()!='mm/dd/yyyy') {
+			tc_date = new Date($(this).val());
 			if ($(this).attr('id') == 'to_date_pl') {
-			to_date_tmp = $(this).val();
 				$("#to_date").val("attr_date_from_dt:[0000-00-00T00:00:00Z TO " + dasheddate(tc_date) + "T00:00:00Z]");
 			}
 			else if ($(this).attr('id') == 'from_date_pl') {
-			tc_date = new Date($(this).val());
 				$("#from_date").val("(attr_date_to_dt:[" + dasheddate(tc_date) + "T00:00:00Z TO *] OR attr_date_from_dt:[" + dasheddate(tc_date) + "T00:00:00Z TO *])");
 			}
 		}
