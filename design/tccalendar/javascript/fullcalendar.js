@@ -3544,13 +3544,13 @@ function AgendaUpcomingView(element, calendar) {
 				origdate = cloneDate(date);
 			}
 			
-			origplusone = cloneDate(date);
+			origplusone = cloneDate(origdate);
 			addMonths(origplusone, 1);	
 			addMonths(date, delta);	
 			onemonthon = cloneDate(date);
 			addMonths(onemonthon, 1);
 			
-			loopme = (delta > 0) ? new Array(origdate, date, origplusone, onemonthon) : new Array(origplusone, onemonthon, origdate, date);
+			loopme = (origdate < date) ? new Array(origdate, date, origplusone, onemonthon) : new Array(origplusone, onemonthon, origdate, date);
 			
 			while (loopme.length > 0) {
 				
