@@ -1244,7 +1244,7 @@ function Calendar(element, options, eventSources) {
 	
 	function today() {
 		date = new Date();
-		renderView();
+		renderView(999);
 	}
 	
 	
@@ -2642,6 +2642,7 @@ function MonthView(element, calendar) {
 	
 	
 	function render(date, delta) {
+		if (delta = 999) delta = false; 
 		if (delta) {
 			addMonths(date, delta);
 			date.setDate(1);
@@ -2694,6 +2695,7 @@ function BasicWeekView(element, calendar) {
 	
 	
 	function render(date, delta) {
+		if (delta = 999) delta = false;
 		if (delta) {
 			addDays(date, delta * 7);
 		}
@@ -2743,6 +2745,7 @@ function BasicDayView(element, calendar) {
 	
 	
 	function render(date, delta) {
+		if (delta = 999) delta = false;
 		if (delta) {
 			addDays(date, delta);
 			if (!opt('weekends')) {
@@ -3440,7 +3443,7 @@ function AgendaSearchView(element, calendar) {
 	}
 	
 	function render(date, delta) {
-   	
+   		if (delta = 999) delta = false;
 		if (delta) {
 			addMonths(date, delta);
 		}
@@ -3533,12 +3536,19 @@ function AgendaUpcomingView(element, calendar) {
 		}
 		
 		//if ((delta && date < today) || (delta == -1 && offset == 0)) {
-			origdate = cloneDate(date);
+			
+			if (delta == 999) {
+				delta = false;
+				origdate = cloneDate(this.start);
+			} else {
+				origdate = cloneDate(date);
+			}
+			
 			origplusone = cloneDate(date);
 			addMonths(origplusone, 1);	
 			addMonths(date, delta);	
 			onemonthon = cloneDate(date);
-			addMonths(onemonthon, 1); 
+			addMonths(onemonthon, 1);
 			
 			loopme = (delta > 0) ? new Array(origdate, date, origplusone, onemonthon) : new Array(origplusone, onemonthon, origdate, date);
 			
@@ -3595,6 +3605,7 @@ function AgendaWeekView(element, calendar) {
 	
 	
 	function render(date, delta) {
+		if (delta = 999) delta = false;
 		if (delta) {
 			addDays(date, delta * 7);
 		}
@@ -3641,6 +3652,7 @@ function AgendaDayView(element, calendar) {
 	
 	
 	function render(date, delta) {
+		if (delta = 999) delta = false;
 		if (delta) {
 			addDays(date, delta);
 			if (!opt('weekends')) {
