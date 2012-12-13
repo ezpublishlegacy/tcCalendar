@@ -135,7 +135,7 @@ $(document).ready(function() {
 		e.preventDefault();
 		$('#calendar').fullCalendar('set_searchfilter', this);
 	})
-	new_equal_col_height($("#tccal_search .column .togblock"));
+	if ($(window).width() >= 620) new_equal_col_height($("#tccal_search .column .togblock"));
 });
 
 function add_datatables() {
