@@ -115,8 +115,9 @@ class tcCalendar {
 		$e_o = new stdClass();
 		if (class_exists('tcEventDataFetcher')) {
 			$event_data = tcEventDataFetcher::fetchData($e);
-			$e_o->backgroundColor = $event_data['backgroundColor'];
-			$e_o->classes = $event_data['classes'];
+			foreach($event_data as $event_data_k => $event_data_v) {
+				$e_o->$event_data_k = $event_data_v;
+			}
 		} else {
 			$e_o->backgroundColor = '"'.$parent_col.'"';
 		}
