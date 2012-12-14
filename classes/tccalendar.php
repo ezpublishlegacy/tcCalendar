@@ -33,7 +33,7 @@ class tcCalendar {
 		
 		if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
 
-		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses, 'SortBy' => array(array('attribute', true, "event/".$this->sd),array('name', true)));
+		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
 		
 		
 		if (!$this->is_master) {
