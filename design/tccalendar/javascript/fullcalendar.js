@@ -815,7 +815,6 @@ function Calendar(element, options, eventSources) {
 	t.searchfilter = false;
 	t.set_searchfilter = set_searchfilter; 
 	t.set_searchfilter_upcoming = set_searchfilter_upcoming; 
-	t.is_search = false
 	
 	
 	// imports
@@ -886,8 +885,8 @@ function Calendar(element, options, eventSources) {
 
 		}); 
 		t.searchfilter['sortBy'] = 'a:1:{s:17:"attr_date_from_dt";s:3:"asc";}';
-		t.is_search = true;
 		changeView('agendaUpcoming');
+		
 	}
 	
 	function set_searchfilter_upcoming() { 
@@ -968,8 +967,7 @@ function Calendar(element, options, eventSources) {
 	
 	function changeView(newViewName) {    
 		if (arguments.length > 1) this.filter = arguments[1];
-		if (!currentView || newViewName != currentView.name || t.is_search == true || t.is_search == 'changed') {
-			if (t.is_search == 'changed') t.is_search = false;
+		if (!currentView || newViewName != currentView.name || newViewName == 'agendaSearch') {
 			ignoreWindowResize++; // because setMinHeight might change the height before render (and subsequently setSize) is reached
 
 			unselect();
@@ -987,22 +985,21 @@ function Calendar(element, options, eventSources) {
 			content.css('overflow', 'hidden');
 			
 			currentView = viewInstances[newViewName];
-			if (currentView && t.is_search == false) {
+			if (currentView) {
 				currentView.element.show();
 			}else{
-				currentView = new fcViews[newViewName](
+				currentView = viewInstances[newViewName] = new fcViews[newViewName](
 					newViewElement = absoluteViewElement =
 						$("<div class='fc-view fc-view-" + newViewName + "' style='position:absolute'/>")
 							.appendTo(content),
 					t // the calendar object
 				);
-				if (t.is_search == false) viewInstances[newViewName] = currentView;
 			}
 			
 			if (oldView) {
 				header.deactivateButton(oldView.name);
 			}
-			if (t.is_search == false) header.activateButton(newViewName);
+			header.activateButton(newViewName);
 			
 			renderView(); // after height has been set, will make absoluteViewElement's position=relative, then set to null
 			
@@ -1404,8 +1401,6 @@ function Header(calendar, options) {
 						else if (fcViews[buttonName]) {
 							buttonClick = function() {
 								button.removeClass(tm + '-state-hover'); // forget why
-								calendar.searchfilter = false;
-								calendar.is_search = (calendar.is_search)? 'changed' : false;
 								calendar.changeView(buttonName);
 							};
 						}
@@ -3487,11 +3482,7 @@ function AgendaUpcomingView(element, calendar) {
 	
 	t.renderEvents = function() { 
 		
-		if (calendar.is_search) {
-			$('.' + t.tm + '-header-title').html("<h2>Search Results</h2>"); 
-		} else {
-			$('.' + t.tm + '-header-title').html("<h2>" + formatDate(this.start, "MMM dd") + " - " + formatDate(this.end, "MMM dd") + "</h2>");  
-		} 
+		$('.' + t.tm + '-header-title').html("<h2>" + formatDate(this.start, "MMM dd") + " - " + formatDate(this.end, "MMM dd") + "</h2>");     
 		
 		if (!calendar.searchfilter) { 
 			calendar.set_searchfilter_upcoming.call();
@@ -4786,7 +4777,10 @@ function AgendaEventRenderer() {
 			html += "div";
 		}
 		tmp_date = new Date(event.start);
-			if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
+			if (event.HasPopup && event.overlib != undefined && event.overlib) {
+				html += ' '+event.overlib;
+			}
+			else if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
 		html +=
 			" class='" + classes.join(' ') + "'" +
 			" style='position:absolute;z-index:8;top:" + seg.top + "px;left:" + seg.left + "px;" + skinCss + "'" +
@@ -5539,7 +5533,10 @@ function DayEventRenderer() {
 				html += "<div";
 			}
 			tmp_date = new Date(event.start);
-			if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
+			if (event.HasPopup && event.overlib != undefined && event.overlib) {
+				html += ' '+event.overlib;
+			}
+			else if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
 			html +=
 				" class='" + classes.join(' ') + "'" +
 				" style='position:absolute;z-index:8;left:"+left+"px;" + skinCss + "'" +
