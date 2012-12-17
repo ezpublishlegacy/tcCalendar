@@ -135,7 +135,11 @@ $(document).ready(function() {
 		e.preventDefault();
 		$('#calendar').fullCalendar('set_searchfilter', this);
 	})
-	if ($(window).width() >= 620) new_equal_col_height($("#tccal_search .column .togblock"));
+	if ($(window).width() >= 620) {
+		new_equal_col_height($("#tccal_search .column .togblock"));
+	} else {
+		$('.fc-header-right').css('display', 'none');
+	}
 });
 
 function add_datatables() {
@@ -623,11 +627,10 @@ function togglecals() {
  
 (function($, undefined) {
 
-
 var defaults = {
 
 	// display
-	defaultView: 'month',
+	defaultView: ($(window).width()>= 620) ? 'month' : 'agendaUpcoming',
 	aspectRatio: 1.35,
 	header: {
 		left: 'title',
@@ -1132,6 +1135,10 @@ function Calendar(element, options, eventSources) {
 					if (uid == resizeUID && !ignoreWindowResize && elementVisible()) {
 						if (elementOuterWidth != (elementOuterWidth = element.outerWidth())) {
 							ignoreWindowResize++; // in case the windowResize callback changes the height
+							if (currentView.name != 'agendaUpcoming' && $(window).width() < 620) {
+								calendar.changeView('agendaUpcoming');
+								$('.fc-header-right').css('display', 'none');
+							}
 							updateSize();
 							currentView.trigger('windowResize', _element);
 							ignoreWindowResize--;
@@ -1142,7 +1149,7 @@ function Calendar(element, options, eventSources) {
 				// calendar must have been initialized in a 0x0 iframe that has just been resized
 				lateRender();
 			}
-		}
+		} 
 	}
 	
 	
