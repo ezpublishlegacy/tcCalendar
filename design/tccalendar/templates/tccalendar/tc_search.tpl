@@ -59,8 +59,8 @@
 		<div class='cal_block'>
 			<div class='cal_line'>
 				<label>From </label>
-				<input class='procme' type='date' value='mm/dd/yyyy' name='filters[]' id='from_date_pl'/>
-				<input class='sendme' type='hidden' name='filters[]' id='from_date' value='mm/dd/yyyy'>
+				<input class='procme' type='date' value='{currentdate()|datetime( 'custom', '%m/%d/%Y' )}' name='filters[]' id='from_date_pl'/>
+				<input class='sendme' type='hidden' name='filters[]' id='from_date' value='{currentdate()|datetime( 'custom', '%m/%d/%Y' )}'>
 			</div>
 			<div class='cal_line'>
 				<label>&nbsp;To </label>
