@@ -147,15 +147,17 @@ class tcCalendar {
 	
 	function get_event_start($objData, $e_o) {
 		
-		if (!is_object($objData[$this->sd])) return false;
-		if (!is_object($objData[$this->st])) {
-			$this->allDay = true;
-			return false;
-		}
-					
+		if ((!is_object($objData[$this->sd])) || $objData[$this->sd]->hasContent() != 1) return false;
 		$date_from = $objData[$this->sd]->content();
-		$time_from = $objData[$this->st]->content();
-		if (!is_object($time_from)) $time_from = new eZDateTime($date_from);
+		if ((!is_object($objData[$this->st])) || $objData[$this->st]->hasContent() != 1) {
+			$this->allDay = true;
+			$time_from = new eZDateTime($date_from);
+			$time_from->setHour(0);
+			$time_from->setMinute(0);
+			$time_from->setSecond(0);
+		} else {
+			$time_from = $objData[$this->st]->content();
+		}
 		$e_o->hour = $time_from->hour();
 		$e_o->minute = $time_from->minute();
 		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month()) -1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . $time_from->minute() .")";
