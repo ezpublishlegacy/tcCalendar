@@ -4787,7 +4787,7 @@ function AgendaEventRenderer() {
 			if (event.HasPopup && event.overlib != undefined && event.overlib) {
 				html += ' '+event.overlib;
 			}
-			else if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
+			else if (event.HasPopup) html += ' onmouseover="return overlib(&quot;' + (event.allDay ? 'All Day' : 'Start time: ' + tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
 		html +=
 			" class='" + classes.join(' ') + "'" +
 			" style='position:absolute;z-index:8;top:" + seg.top + "px;left:" + seg.left + "px;" + skinCss + "'" +
@@ -5543,7 +5543,7 @@ function DayEventRenderer() {
 			if (event.HasPopup && event.overlib != undefined && event.overlib) {
 				html += ' '+event.overlib;
 			}
-			else if (event.HasPopup) html += ' onmouseover="return overlib(&quot;Start time: ' + (event.allDay ? ' All day' : tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
+			else if (event.HasPopup) html += ' onmouseover="return overlib(&quot;' + (event.allDay ? 'All Day' : 'Start time: ' + tmp_date.format('shortTime')) + '&lt;br/&gt;' + event.location + '&quot;, LEFT, FGCOLOR, &quot;#fff&quot;, BGCOLOR, &quot;'+event.backgroundColor.replace('"', "")+'&quot;, CAPTION, &quot;' + event.title + '&quot;, TEXTSIZE, &quot;12px&quot;);" onmouseout="return nd();" onclick="nd_quiet();"';
 			html +=
 				" class='" + classes.join(' ') + "'" +
 				" style='position:absolute;z-index:8;left:"+left+"px;" + skinCss + "'" +
