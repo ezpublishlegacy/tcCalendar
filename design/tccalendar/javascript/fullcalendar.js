@@ -150,38 +150,6 @@ function add_datatables() {
 	});
 }
 
-function get_callendar_html(searchform) {
-
-	var qstring = '/functionview/output/ezfModuleFunctionCollection/search/eventstable?';
-	var filter = new Array();
-	$(searchform).find('.sendme').each(function(){
-		if ($(this).val()!='all' && $(this).val()!='mm/dd/yyyy') {
-			if ($(this).attr('name') == 'to_date') {
-				filter.push("attr_date_from_dt:[0000-00-00T00:00:00Z TO " + $(this).val() + "T00:00:00Z]");
-			}
-			
-			else if ($(this).attr('name') == 'from_date') {
-				filter.push("(attr_date_to_dt:[" + $(this).val() + "T00:00:00Z TO *] OR attr_date_from_dt:[" + $(this).val() + "T00:00:00Z TO *])");
-			}
-			
-			else qstring += $(this).attr('name') + '=' + URLEncode($(this).val()) + '&';
-		}
-		
-	});
-	
-	$(searchform).find('.filterme').each(function(){
-		if ($(this).val()!='all' && $(this).val()!='') {
-			top.filterString += ' ' + $(this).val();
-		}
-		
-	});
-	
-	if (filter.length > 0) qstring +='filters=' + URLEncode(serialize(filter))      
-	
-	$('#calendar').fullCalendar('changeView', 'agendaSearch', qstring);
-	
-} 
-
 if (typeof unserialize == 'undefined') {
 	
 	function unserialize (data) {
@@ -816,6 +784,7 @@ function Calendar(element, options, eventSources) {
 	t.option = option;
 	t.trigger = trigger;
 	t.searchfilter = false;
+	t.searchtype = false;
 	t.set_searchfilter = set_searchfilter; 
 	t.set_searchfilter_upcoming = set_searchfilter_upcoming; 
 	
@@ -866,6 +835,7 @@ function Calendar(element, options, eventSources) {
 	function set_searchfilter(eventform) { 
 		
 		t.searchfilter = {};
+		t.searchtype = 'agendaSearch';
 		
 		$(eventform).find('.sendme').each(function(){
 			
@@ -899,6 +869,7 @@ function Calendar(element, options, eventSources) {
 		d_string=cur_date.getFullYear()+'-'+(cur_date.getMonth()+1)+'-'+cur_date.getDate()+'T00:00:00Z';
 		d_string2=tmp.getFullYear()+'-'+(tmp.getMonth() +1)+'-'+tmp.getDate()+'T00:00:00Z';
 		t.searchfilter = {};
+		t.searchtype = 'agendaUpcoming';
 		t.searchfilter['filters'] = "(attr_date_to_dt:["+d_string+" TO *] OR attr_date_from_dt:["+d_string+" TO *]) AND (meta_contentclass_id_si:40 OR meta_contentclass_id_si:49) AND attr_date_from_dt:[0000-00-00T00:00:00Z TO "+d_string2+"]";
 		t.searchfilter['query'] = "";
 		t.searchfilter['offset'] = 0;
@@ -969,8 +940,7 @@ function Calendar(element, options, eventSources) {
 	// TODO: improve view switching (still weird transition in IE, and FF has whiteout problem)
 	
 	function changeView(newViewName) {    
-		if (arguments.length > 1) this.filter = arguments[1];
-		if (!currentView || newViewName != currentView.name || newViewName == 'agendaSearch') {
+		if (!currentView || newViewName != currentView.name || (currentView.searchtype && currentView.searchtype != 'newViewName')) {
 			ignoreWindowResize++; // because setMinHeight might change the height before render (and subsequently setSize) is reached
 
 			unselect();
@@ -986,23 +956,32 @@ function Calendar(element, options, eventSources) {
 				setMinHeight(content, 1); // needs to be 1 (not 0) for IE7, or else view dimensions miscalculated
 			}
 			content.css('overflow', 'hidden');
-			
-			currentView = viewInstances[newViewName];
+
+		    currentView = (t.searchtype != 'agendaSearch') ? viewInstances[newViewName] : false;
 			if (currentView) {
 				currentView.element.show();
 			}else{
+				if (t.searchtype != 'agendaSearch') {
 				currentView = viewInstances[newViewName] = new fcViews[newViewName](
 					newViewElement = absoluteViewElement =
 						$("<div class='fc-view fc-view-" + newViewName + "' style='position:absolute'/>")
 							.appendTo(content),
 					t // the calendar object
 				);
+				} else {
+					currentView = new fcViews[newViewName](
+						newViewElement = absoluteViewElement =
+							$("<div class='fc-view fc-view-" + newViewName + "' style='position:absolute'/>")
+								.appendTo(content),
+						t // the calendar object
+					);
+				}
 			}
 			
 			if (oldView) {
 				header.deactivateButton(oldView.name);
 			}
-			header.activateButton(newViewName);
+			if (t.searchtype != 'agendaSearch') header.activateButton(newViewName);
 			
 			renderView(); // after height has been set, will make absoluteViewElement's position=relative, then set to null
 			
@@ -1408,6 +1387,8 @@ function Header(calendar, options) {
 						else if (fcViews[buttonName]) {
 							buttonClick = function() {
 								button.removeClass(tm + '-state-hover'); // forget why
+								if (buttonName != '')
+								if (buttonName == 'agendaUpcoming') calendar.set_searchfilter_upcoming.call();
 								calendar.changeView(buttonName);
 							};
 						}
@@ -3397,78 +3378,11 @@ function BasicEventRenderer() {
 
 }        
 
-fcViews.agendaSearch = AgendaSearchView;
-
-function AgendaSearchView(element, calendar) {
-	var t = this;
-	
-	var date = new Date();
-	
-	t.setHeight = t.opt = t.setWidth = t.clearEvents = t.trigger = function(){};
-	
-	t.name = 'agendaSearch';
-	
-	SelectionManager.call(t);
-	
-	// exports
-	t.render = render;  
-	
-	t.element = $(".fc-view-agendaSearch"); 
-	
-	t.tm = calendar.option('theme') ? 'ui' : 'fc';       
-	
-	t.renderEvents = function() { 
-		
-		$('.' + t.tm + '-header-title').html("<h2>" + formatDate(this.start, "MMM dd") + " - " + formatDate(tmp, "MMM dd") + "</h2>");     
-		
-		function dasheddate(date) {
-			var upcoming_start_currentDate = date
-			var upcoming_start_day = upcoming_start_currentDate.getDate();
-			var upcoming_start_month = upcoming_start_currentDate.getMonth() + 1;
-			var upcoming_start_year = upcoming_start_currentDate.getFullYear();
-			return upcoming_start_day + "-" + upcoming_start_month + "-" + upcoming_start_year;
-		}
-		
-		if (calendar.filter) {
-			my_url = calendar.filter;
-			calendar.filter = false;
-			this.eventsDirty = true;
-		} else {
-		    my_url = "/tccalendar/upcoming/" + tc_cal_id + "/" + URLEncode(dasheddate(this.start)) + '/' + URLEncode(dasheddate(tmp));
-		}
-		
-		$(function(){
-			$.ajax({
-						'async':true,
-						'url': my_url,
-						'dataType':'html',
-						'success':function(data){
-							$("." + t.tm + "-view-agendaSearch").html(data);
-						}
-			})
-		})
-	}
-	
-	function render(date, delta) {
-   		if (delta == 999) delta = false;
-		if (delta) {
-			addMonths(date, delta);
-		}
-		
-		tmp = cloneDate(date);
-		addMonths(tmp, 1); 
-		
-		this.start = date;
-		this.end = tmp;      
-
-	}
-	
-}
-
 fcViews.agendaUpcoming = AgendaUpcomingView;
 
 function AgendaUpcomingView(element, calendar) {
 	var t = this;
+	t.searchtype = calendar.searchtype;
 	
 	var date = new Date();    
 	date.setHours(0,0,0,0);
@@ -3490,10 +3404,6 @@ function AgendaUpcomingView(element, calendar) {
 	t.renderEvents = function() { 
 		
 		$('.' + t.tm + '-header-title').html("<h2>" + formatDate(this.start, "MMM dd") + " - " + formatDate(this.end, "MMM dd") + "</h2>");     
-		
-		if (!calendar.searchfilter) { 
-			calendar.set_searchfilter_upcoming.call();
-		}
 
 		my_url = $('#tccal_search form').attr('action') + '?';
 		for (i in calendar.searchfilter) {
