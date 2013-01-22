@@ -68,3 +68,7 @@
 #overDiv table td {
     padding: 4px;
 }
+img.waiting {
+	margin: 30px auto;
+	display: block;
+}

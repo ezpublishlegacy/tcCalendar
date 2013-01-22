@@ -3426,7 +3426,7 @@ function AgendaUpcomingView(element, calendar) {
 		my_url = my_url.replace(/&$/, '');
 		
 		my_url += "&fetchfrom=" + formatDate(this.start, "yyyy-MM-dd");
-		
+		$("." + t.tm + "-view-agendaUpcoming").html("<img class='waiting' src='/extension/tccalendar/design/tccalendar/images/waiting.gif'/>");
 		$(function(){
 			$.ajax({
 						'async':true,
