@@ -123,10 +123,10 @@ class tcCalendar {
 		}
 		$e_o->id = $event_id;
 		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
-			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
+			$e_o->title = '"'.addslashes($objData[$this->title_id]->content()).'"';
 		}
 		if (array_key_exists($this->location_id, $objData) && is_object($objData[$this->location_id])) {
-			$e_o->location = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->location_id]->content())).'"';
+			$e_o->location = '"'.addslashes($objData[$this->location_id]->content()).'"';
 		}
 		$e_o->start = $this->get_event_start($objData, $e_o);
 		$e_o->end = $this->get_event_end($objData);
