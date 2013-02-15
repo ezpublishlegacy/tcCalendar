@@ -162,9 +162,10 @@ class eZRepeatEvent
 		$RRule = new RRule($start, $this->text_to_rrule());
 		$running = true;
 		$output = array();
+		$use_end =  ($this->end == -1) ? strtotime('+1 year') : ($this->end + (60*60*24) - 1);
 		while ($running) {
 			$next_date = $RRule->GetNext();
-			if (!$next_date || $next_date->_epoch > ($this->end + (60*60*24) - 1)) {
+			if (!$next_date || $next_date->_epoch > $use_end) {
 				$running = false;
 			} else {
 				$output[] = $next_date->_epoch;
