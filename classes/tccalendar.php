@@ -11,52 +11,66 @@ class tcCalendar {
 		$this->node_id = $cal_id;
 
 		$cal_node = eZContentObjectTreeNode::fetch($cal_id);
+		
+		if (is_object($cal_node)) {
 
-		$cal_node_data = $cal_node->dataMap();
+			$cal_node_data = $cal_node->dataMap();
 		
-		$this->is_master = (array_key_exists($is_master_id, $cal_node_data)) ? $cal_node_data[$is_master_id]->content() : true;
+			$this->is_master = (array_key_exists($is_master_id, $cal_node_data)) ? $cal_node_data[$is_master_id]->content() : true;
 		
-		if ($this->is_master) $cal_id = 2;
+			if ($this->is_master) $cal_id = 2;
 		
-		$eventclasses = $ezphpicalendarini->variable( "ClassSettings", "EventClassIds" );
+			$eventclasses = $ezphpicalendarini->variable( "ClassSettings", "EventClassIds" );
 		
-		$this->title_id = $ezphpicalendarini->variable( "ClassSettings", "TitleAttributeIdentifier");
-		$this->location_id = $ezphpicalendarini->variable( "ClassSettings", "LocationAttributeIdentifier");
-		$this->calcol_id = $ezphpicalendarini->variable( "ClassSettings", "CalColorAttributeIdentifier");
-		$this->sd = $ezphpicalendarini->variable( "ClassSettings", "StartDateAttributeIdentifier");
-		$this->st = $ezphpicalendarini->variable( "ClassSettings", "StartTimeAttributeIdentifier");
-		$this->ed = $ezphpicalendarini->variable( "ClassSettings", "EndDateAttributeIdentifier");
-		$this->et = $ezphpicalendarini->variable( "ClassSettings", "EndTimeAttributeIdentifier");
-		$this->r = $ezphpicalendarini->variable( "ClassSettings", "EventClassRepeatAttributes");
-		$this->HasPopup = $ezphpicalendarini->variable( "PopupOptions", "HasPopup");
-		$this->col_r=array();
+			$this->title_id = $ezphpicalendarini->variable( "ClassSettings", "TitleAttributeIdentifier");
+			$this->location_id = $ezphpicalendarini->variable( "ClassSettings", "LocationAttributeIdentifier");
+			$this->calcol_id = $ezphpicalendarini->variable( "ClassSettings", "CalColorAttributeIdentifier");
+			$this->sd = $ezphpicalendarini->variable( "ClassSettings", "StartDateAttributeIdentifier");
+			$this->st = $ezphpicalendarini->variable( "ClassSettings", "StartTimeAttributeIdentifier");
+			$this->ed = $ezphpicalendarini->variable( "ClassSettings", "EndDateAttributeIdentifier");
+			$this->et = $ezphpicalendarini->variable( "ClassSettings", "EndTimeAttributeIdentifier");
+			$this->r = $ezphpicalendarini->variable( "ClassSettings", "EventClassRepeatAttributes");
+			$this->HasPopup = $ezphpicalendarini->variable( "PopupOptions", "HasPopup");
+			$this->col_r=array();
 		
-		if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
+			if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
 
-		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
+			$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
 		
 		
-		if (!$this->is_master) {
-			$params['Depth'] = 1;
-			$params['DepthOperator'] = 'eq';
-		}
+			if (!$this->is_master) {
+				$params['Depth'] = 1;
+				$params['DepthOperator'] = 'eq';
+			}
+			
+			$this->ed_i = false;
+			$this->sd_i = false;
 
-		$attribute_filter = array();
-		if ($to_time != null) {
-			$attribute_filter[] = array("event/".$this->sd, "between", array(0,strtotime($to_time.'T23:59:59')));
-		}
-		if ($from_time != null) {
-			$attribute_filter[] = array("event/".$this->ed, "not_between", array(1,strtotime($from_time)));
-			$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
-		}
-		if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
+			$attribute_filter = array();
+			if ($to_time != null) {
+				$this->ed_i = strtotime($to_time.'T23:59:59');
+				$attribute_filter[] = array("event/".$this->sd, "between", array(0,strtotime($to_time.'T23:59:59')));
+			}
+			if ($from_time != null) {
+				$this->sd_i = strtotime($from_time);
+				$attribute_filter[] = array("event/".$this->ed, "not_between", array(1,strtotime($from_time)));
+				//$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
+			}
+			if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
 
-		$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
+			$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
 		      
-		if (in_array($cal_node->object()->contentClass()->attribute('id'), $eventclasses) && $for_output) $events = array($cal_node);
+			if (in_array($cal_node->object()->contentClass()->attribute('id'), $eventclasses) && $for_output) $events = array($cal_node);
 
-		$this->events = $events;
+			$this->events = $events;
 		
+		}
+		
+	}
+	
+	static function outputasjson($cal_id, $from_time = null, $to_time = null) {
+		$cal = new tcCalendar($cal_id, $from_time, $to_time);
+		return $cal->monthtojson();
 	}
 	
 	function monthtojson() {
@@ -76,6 +90,10 @@ class tcCalendar {
 						$normal = false;
 						$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
 						foreach ($start_times as $t) {
+							
+							if ($this->sd_i && $t < $this->sd_i) continue;
+							if ($this->ed_i && $t > $this->ed_i) continue;
+							
 							$mytime = new eZDateTime($t);
 							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
 						
@@ -84,7 +102,7 @@ class tcCalendar {
 					}
 				}
 			} 
-			if ($normal) {
+			if ($normal && $e_o->status != 'error_without_repeat') {
 				$output .= $this->eventobjecttojson($e_o);
 			}
 		}
@@ -95,6 +113,9 @@ class tcCalendar {
 	}
 	
 	function eventtoobject($e) {
+		
+		$objData = $e->dataMap();
+		
 		$this->allDay = false;
 		$parent_node_id = $e->attribute('parent_node_id');
 		
@@ -110,7 +131,7 @@ class tcCalendar {
 			$parent_col = $this->col_r['node_'.$parent_node_id];
 		}
 		$event_id = $e->attribute('node_id');
-		$objData = $e->dataMap();
+
 		if (array_key_exists('hide_from_calendar', $objData) && $objData['hide_from_calendar']->content()) return false; 
 		$e_o = new stdClass();
 		if (class_exists('tcEventDataFetcher')) {
@@ -122,14 +143,15 @@ class tcCalendar {
 			$e_o->backgroundColor = '"'.$parent_col.'"';
 		}
 		$e_o->id = $event_id;
+		$e_o->start = $this->get_event_start($objData, $e_o);
+		$e_o->end = $this->get_event_end($objData, $e_o);
+		
 		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
 			$e_o->title = '"'.addslashes($objData[$this->title_id]->content()).'"';
 		}
 		if (array_key_exists($this->location_id, $objData) && is_object($objData[$this->location_id])) {
 			$e_o->location = '"'.addslashes($objData[$this->location_id]->content()).'"';
 		}
-		$e_o->start = $this->get_event_start($objData, $e_o);
-		$e_o->end = $this->get_event_end($objData);
 		if ($this->allDay === false) $e_o->allDay = 'false';
 		$e_o->HasPopup = ($this->HasPopup == enabled) ? 'true' : 'false';
 		$e_o->url = '"/' . $e->urlAlias(). '"';
@@ -162,15 +184,24 @@ class tcCalendar {
 		$e_o->minute = $time_from->minute();
 		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month()) -1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . $time_from->minute() .")";
 		
+		$test_start = strtotime((floor($date_from->month()) -1) ."/". $date_from->day() ."/". $date_from->year());
+		if ($this->ed_i && $test_start > $this->ed_i) $e_o->status = 'error_without_repeat';
+		
 		return $out;
 			 
 	}
 	
-	function get_event_end($objData) {
+	function get_event_end($objData, $e_o) {
 	
 		if (!is_object($objData[$this->ed])) {
 			$this->allDay = true;
+			if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
 			return false;
+		} else {
+			if ($objData[$this->ed]->attribute('data_int') == 0) {
+				$this->allDay = true;
+				if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
+			}
 		}
 		if (!is_object($objData[$this->et])) {
 			$this->allDay = true;
@@ -188,6 +219,9 @@ class tcCalendar {
 		
 		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month()) -1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . $time_to->minute() .")";
 		
+		$test_end = strtotime((floor($date_to->month()) -1) ."/". $date_to->day() ."/". $date_to->year());
+		if ($this->sd_i && $test_end < $this->sd_i) return 'error';
+		
 		return $out;
 				
 	}
@@ -197,8 +231,10 @@ class tcCalendar {
 	var $output;
 	var $sd;
 	var $st;
+	var $sd_i;
 	var $ed;
 	var $et;
+	var $ed_i;
 	var $r;
 	var $col_r;
 	var $allDay;
