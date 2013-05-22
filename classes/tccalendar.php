@@ -68,7 +68,8 @@ class tcCalendar {
 		
 	}
 	
-	static function outputasjson($cal_id, $from_time = null, $to_time = null) {
+	static function outputasjson($cal_id, $from_time = null, $to_time = null, $event_id=null) {
+		if ($event_id !== null) return ezjscAjaxContent::nodeEncode(eZContentObjectTreeNode::fetch($event_id)->Object(), array('dataMap'=>array('all')));
 		$cal = new tcCalendar($cal_id, $from_time, $to_time);
 		return $cal->monthtojson();
 	}
