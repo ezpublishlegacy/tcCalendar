@@ -24,6 +24,8 @@ class tcCalendar {
 		
 			$this->title_id = $ezphpicalendarini->variable( "ClassSettings", "TitleAttributeIdentifier");
 			$this->location_id = $ezphpicalendarini->variable( "ClassSettings", "LocationAttributeIdentifier");
+			$this->venue_id = $ezphpicalendarini->variable( "ClassSettings", "VenueAttributeIdentifier");
+			$this->description_id = $ezphpicalendarini->variable( "ClassSettings", "DescriptionAttributeIdentifier");
 			$this->calcol_id = $ezphpicalendarini->variable( "ClassSettings", "CalColorAttributeIdentifier");
 			$this->sd = $ezphpicalendarini->variable( "ClassSettings", "StartDateAttributeIdentifier");
 			$this->st = $ezphpicalendarini->variable( "ClassSettings", "StartTimeAttributeIdentifier");
@@ -71,14 +73,14 @@ class tcCalendar {
 	static function outputasjson($cal_id, $from_time = null, $to_time = null, $event_id=null) {
 		if ($event_id !== null) return ezjscAjaxContent::nodeEncode(eZContentObjectTreeNode::fetch($event_id)->Object(), array('dataMap'=>array('all')));
 		$cal = new tcCalendar($cal_id, $from_time, $to_time);
-		return $cal->monthtojson();
+		return $cal->monthtojson('fulldata');
 	}
 	
-	function monthtojson() {
+	function monthtojson($type = false) {
 		$output =  "var tcevents = [\r\n";
 		foreach($this->events as $e) {
 
-			$e_o = $this->eventtoobject($e);
+			$e_o = $this->eventtoobject($e, $type);
 			if ($e_o === false) continue; 
 			$myclass_id = $e->object()->contentClass()->attribute('id');
 			$repeaters = $this->r;
@@ -113,8 +115,7 @@ class tcCalendar {
 		return $output;
 	}
 	
-	function eventtoobject($e) {
-		
+	function eventtoobject($e, $type = false) {
 		$objData = $e->dataMap();
 		
 		$this->allDay = false;
@@ -153,6 +154,23 @@ class tcCalendar {
 		if (array_key_exists($this->location_id, $objData) && is_object($objData[$this->location_id])) {
 			$e_o->location = '"'.addslashes($objData[$this->location_id]->content()).'"';
 		}
+		
+		if ($type = 'fulldata') {
+		
+			if (array_key_exists($this->description_id, $objData) && is_object($objData[$this->description_id])) {
+				if ($objData[$this->description_id]->hasContent()) $e_o->description = '"'.trim(addslashes(preg_replace("/\r|\n/", "", nl2br($objData[$this->description_id]->content()->attribute('output')->attribute('output_text'))))).'"';
+			}
+			$ven = array();
+			foreach(explode(",",$this->venue_id) as $v) {
+				if (array_key_exists($v, $objData) && is_object($objData[$v])) {
+					$addme = addslashes($objData[$v]->content());
+					if ($addme != "") $ven[] = $addme;
+				}
+			}
+			$e_o->venue = '"'.implode(", ", $ven).'"';
+		
+		}
+		
 		if ($this->allDay === false) $e_o->allDay = 'false';
 		$e_o->HasPopup = ($this->HasPopup == enabled) ? 'true' : 'false';
 		$e_o->url = '"/' . $e->urlAlias(). '"';
