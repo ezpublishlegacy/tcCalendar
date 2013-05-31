@@ -26,6 +26,8 @@ class tcCalendar {
 			$this->location_id = $ezphpicalendarini->variable( "ClassSettings", "LocationAttributeIdentifier");
 			$this->venue_id = $ezphpicalendarini->variable( "ClassSettings", "VenueAttributeIdentifier");
 			$this->description_id = $ezphpicalendarini->variable( "ClassSettings", "DescriptionAttributeIdentifier");
+			$this->region_id = $ezphpicalendarini->variable( "ClassSettings", "RegionAttributeIdentifier");
+			$this->category_id = $ezphpicalendarini->variable( "ClassSettings", "CategoryAttributeIdentifier");
 			$this->calcol_id = $ezphpicalendarini->variable( "ClassSettings", "CalColorAttributeIdentifier");
 			$this->sd = $ezphpicalendarini->variable( "ClassSettings", "StartDateAttributeIdentifier");
 			$this->st = $ezphpicalendarini->variable( "ClassSettings", "StartTimeAttributeIdentifier");
@@ -157,8 +159,14 @@ class tcCalendar {
 		
 		if ($type = 'fulldata') {
 		
+			if (array_key_exists($this->region_id, $objData) && is_object($objData[$this->region_id])) {
+				if ($objData[$this->region_id]->hasContent()) $e_o->region = '"'.trim(addslashes(preg_replace("/\r|\n/", "", nl2br($objData[$this->region_id]->metaData())))).'"';
+			}
+			if (array_key_exists($this->category_id, $objData) && is_object($objData[$this->category_id])) {
+				if ($objData[$this->category_id]->hasContent()) $e_o->cagetory = '"'.trim(addslashes(preg_replace("/\r|\n/", "", nl2br($objData[$this->category_id]->metaData())))).'"';
+			}
 			if (array_key_exists($this->description_id, $objData) && is_object($objData[$this->description_id])) {
-				if ($objData[$this->description_id]->hasContent()) $e_o->description = '"'.trim(addslashes(preg_replace("/\r|\n/", "", nl2br($objData[$this->description_id]->content()->attribute('output')->attribute('output_text'))))).'"';
+				if ($objData[$this->description_id]->hasContent()) $e_o->description = '"'.trim(addslashes(preg_replace("/\r|\n/", "", nl2br($objData[$this->description_id]->metaData())))).'"';
 			}
 			$ven = array();
 			foreach(explode(",",$this->venue_id) as $v) {
