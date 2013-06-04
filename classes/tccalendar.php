@@ -189,7 +189,7 @@ class tcCalendar {
 	function eventobjecttojson($e_o) {
 		$out = chr(123);
 		foreach($e_o as $k=>$v) {
-			if ($v) $out .= "$k: $v,\r\n";
+			if ($v && $k !='status') $out .= "$k: $v,\r\n";
 		}
 		return preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n";
 	}
@@ -247,7 +247,7 @@ class tcCalendar {
 		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month()) -1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . $time_to->minute() .")";
 		
 		$test_end = strtotime((floor($date_to->month()) -1) ."/". $date_to->day() ."/". $date_to->year());
-		if ($this->sd_i && $test_end < $this->sd_i) return 'error';
+		if ($this->sd_i && $test_end < $this->sd_i) return false;
 		
 		return $out;
 				
