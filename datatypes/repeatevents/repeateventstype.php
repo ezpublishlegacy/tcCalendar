@@ -115,6 +115,11 @@ class repeatEventsType extends eZDataType
         return 'int';
     }
 
+    function toString($contentObjectAttribute)
+    {
+        return $contentObjectAttribute->content()->attribute('rrule');
+    }
+
     function hasObjectAttributeContent( $contentObjectAttribute )
     {
         return trim( $contentObjectAttribute->attribute( 'data_text' ) ) != '';
