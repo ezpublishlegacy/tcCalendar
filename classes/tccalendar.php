@@ -80,6 +80,7 @@ class tcCalendar {
 	
 	function monthtojson($type = false) {
 		$output =  "var tcevents = [\r\n";
+		$j_output = array();
 		foreach($this->events as $e) {
 
 			$e_o = $this->eventtoobject($e, $type);
@@ -101,17 +102,25 @@ class tcCalendar {
 							
 							$mytime = new eZDateTime($t);
 							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
-						
-							$output .= $this->eventobjecttojson($e_o);
+							if ($type == 'fulldata') {
+								$j_output[] = $e_o;
+							} else {
+								$output .= $this->eventobjecttojson($e_o);
+							}
+							
 						}
 					}
 				}
 			} 
 			if ($normal && $e_o->status != 'error_without_repeat') {
-				$output .= $this->eventobjecttojson($e_o);
+				if ($type == 'fulldata') {
+					$j_output[] = $e_o;
+				} else {
+					$output .= $this->eventobjecttojson($e_o);
+				}
 			}
 		}
-		
+		if ($type == 'fulldata') return json_encode($j_output);
 		$output .= "];\r\n";
 		$output .= "var tc_cal_id = " . $this->node_id . ";";
 		return $output;
