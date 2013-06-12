@@ -167,7 +167,7 @@ class tcCalendar {
 			$e_o->location = '"'.addslashes($objData[$this->location_id]->content()).'"';
 		}
 		
-		if ($type = 'fulldata') {
+		if ($type == 'fulldata') {
 		
 			if (array_key_exists($this->region_id, $objData) && is_object($objData[$this->region_id])) {
 				if ($objData[$this->region_id]->hasContent()) $e_o->region = trim(preg_replace("/\r|\n/", "", nl2br($objData[$this->region_id]->metaData())));
