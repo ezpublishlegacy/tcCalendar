@@ -103,6 +103,7 @@ class tcCalendar {
 							
 							$mytime = new eZDateTime($t);
 							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
+							if ($type == 'fulldata') $out = strtotime((floor($mytime->month()) -1) ."/". $mytime->day() ."/". $mytime->year() ." ".$e_o->hour.":".$e_o->minute);
 							if ($type == 'fulldata') {
 								$j_output[] = $e_o;
 							} else {
