@@ -130,6 +130,8 @@ class tcCalendar {
 	function eventtoobject($e, $type = false) {
 		$objData = $e->dataMap();
 		
+		$forjs = ($type == 'fulldata') ? '' : '"';
+		
 		$this->allDay = false;
 		$parent_node_id = $e->attribute('parent_node_id');
 		
@@ -151,20 +153,20 @@ class tcCalendar {
 		if (class_exists('tcEventDataFetcher')) {
 			$event_data = tcEventDataFetcher::fetchData($e);
 			foreach($event_data as $event_data_k => $event_data_v) {
-				$e_o->$event_data_k = $event_data_v;
+				$e_o->$event_data_k = ($type == 'fulldata') ? trim($event_data_v, '"') : $event_data_v;
 			}
 		} else {
-			$e_o->backgroundColor = '"'.$parent_col.'"';
+			$e_o->backgroundColor = $forjs.$parent_col.$forjs;
 		}
 		$e_o->id = $event_id;
-		$e_o->start = $this->get_event_start($objData, $e_o);
-		$e_o->end = $this->get_event_end($objData, $e_o);
+		$e_o->start = $this->get_event_start($objData, $e_o, $type);
+		$e_o->end = $this->get_event_end($objData, $e_o, $type);
 		
 		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
-			$e_o->title = '"'.addslashes($objData[$this->title_id]->content()).'"';
+			$e_o->title = $forjs.addslashes($objData[$this->title_id]->content()).$forjs;
 		}
 		if (array_key_exists($this->location_id, $objData) && is_object($objData[$this->location_id])) {
-			$e_o->location = '"'.addslashes($objData[$this->location_id]->content()).'"';
+			$e_o->location = $forjs.addslashes($objData[$this->location_id]->content()).$forjs;
 		}
 		
 		if ($type == 'fulldata') {
@@ -189,13 +191,13 @@ class tcCalendar {
 					if ($addme != "") $ven[] = $addme;
 				}
 			}
-			$e_o->venue = '"'.implode(", ", $ven).'"';
+			$e_o->venue = $forjs.implode(", ", $ven).$forjs;
 		
 		}
 		
 		if ($this->allDay === false) $e_o->allDay = 'false';
 		$e_o->HasPopup = ($this->HasPopup == enabled) ? 'true' : 'false';
-		$e_o->url = '"/' . $e->urlAlias(). '"';
+		$e_o->url = $forjs.'/' . $e->urlAlias(). $forjs;
 		
 		return $e_o;
 	}
@@ -208,7 +210,7 @@ class tcCalendar {
 		return preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n";
 	}
 	
-	function get_event_start($objData, $e_o) {
+	function get_event_start($objData, $e_o, $type=false) {
 		
 		if ((!is_object($objData[$this->sd])) || $objData[$this->sd]->hasContent() != 1) return false;
 		$date_from = $objData[$this->sd]->content();
@@ -224,6 +226,7 @@ class tcCalendar {
 		$e_o->hour = $time_from->hour();
 		$e_o->minute = $time_from->minute();
 		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month()) -1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . $time_from->minute() .")";
+		if ($type == 'fulldata') $out = strtotime((floor($date_from->month()) -1) ."/". $date_from->day() ."/". $date_from->year() ." ".$time_from->hour().":".$time_from->minute());
 		
 		$test_start = strtotime((floor($date_from->month()) -1) ."/". $date_from->day() ."/". $date_from->year());
 		if ($this->ed_i && $test_start > $this->ed_i) $e_o->status = 'error_without_repeat';
@@ -232,7 +235,7 @@ class tcCalendar {
 			 
 	}
 	
-	function get_event_end($objData, $e_o) {
+	function get_event_end($objData, $e_o, $type=false) {
 	
 		if (!is_object($objData[$this->ed])) {
 			$this->allDay = true;
@@ -259,6 +262,7 @@ class tcCalendar {
 		}
 		
 		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month()) -1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . $time_to->minute() .")";
+		if ($type == 'fulldata') $out = strtotime((floor($date_to->month()) -1) ."/". $date_to->day() ."/". $date_to->year() ." ".$time_to->hour().":".$time_to->minute());
 		
 		$test_end = strtotime((floor($date_to->month()) -1) ."/". $date_to->day() ."/". $date_to->year());
 		if ($this->sd_i && $test_end < $this->sd_i) return false;
