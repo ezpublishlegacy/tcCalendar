@@ -103,7 +103,7 @@ class tcCalendar {
 							
 							$mytime = new eZDateTime($t);
 							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
-							if ($type == 'fulldata') $e_o->start = strtotime((floor($mytime->month()) -1) ."/". $mytime->day() ."/". $mytime->year() ." ".$e_o->hour.":".$e_o->minute);
+							if ($type == 'fulldata') $e_o->start = strtotime((floor($mytime->month())) ."/". $mytime->day() ."/". $mytime->year() ." ".$e_o->hour.":".$e_o->minute);
 							if ($type == 'fulldata') {
 								$j_output[] = $e_o;
 							} else {
@@ -238,7 +238,6 @@ class tcCalendar {
 	}
 	
 	function get_event_end($objData, $e_o, $type=false) {
-
 		if (!is_object($objData[$this->ed])) {
 			$this->allDay = true;
 			if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
