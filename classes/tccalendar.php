@@ -74,12 +74,15 @@ class tcCalendar {
 			$params3 = $params;
 			
 			if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
-			if (count($attribute_filter2)) $params2['AttributeFilter'] = $attribute_filter;
-			if (count($attribute_filter3)) $params3['AttributeFilter'] = $attribute_filter;
+			if (count($attribute_filter2)) $params2['AttributeFilter'] = $attribute_filter2;
+			if (count($attribute_filter3)) $params3['AttributeFilter'] = $attribute_filter3;
 
 			$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
 			$events2 = eZContentObjectTreeNode::subTreeByNodeID( $params2, $cal_id );
 			$events3 = eZContentObjectTreeNode::subTreeByNodeID( $params3, $cal_id );
+			
+
+			
 			
 			foreach (array($events2, $events3) as $es) {
 				foreach ($es as $e) {
