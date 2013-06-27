@@ -54,6 +54,8 @@ class tcCalendar {
 			$attribute_filter = array();
 			$attribute_filter2 = array();
 			$attribute_filter3 = array();
+			$events2 = array();
+			$events3 = array();
 			
 			if ($to_time != null) {
 				$this->ed_i = strtotime($to_time.'T23:59:59');
@@ -69,20 +71,21 @@ class tcCalendar {
 				$attribute_filter3[] = array("event/".$this->sd, "between", array(0,strtotime($from_time)));
 				$attribute_filter3[] = array("event/".$this->r, ">", strtotime($from_time));
 				//$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
+				
+				$params2 = $params;
+				$params3 = $params;
+				
+				$params2['AttributeFilter'] = $attribute_filter2;
+				$params3['AttributeFilter'] = $attribute_filter3;
+				
+				$events2 = eZContentObjectTreeNode::subTreeByNodeID( $params2, $cal_id );
+				$events3 = eZContentObjectTreeNode::subTreeByNodeID( $params3, $cal_id );
 			}
-			$params2 = $params;
-			$params3 = $params;
+
 			
 			if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
-			if (count($attribute_filter2)) $params2['AttributeFilter'] = $attribute_filter2;
-			if (count($attribute_filter3)) $params3['AttributeFilter'] = $attribute_filter3;
 
 			$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
-			$events2 = eZContentObjectTreeNode::subTreeByNodeID( $params2, $cal_id );
-			$events3 = eZContentObjectTreeNode::subTreeByNodeID( $params3, $cal_id );
-			
-
-			
 			
 			foreach (array($events2, $events3) as $es) {
 				foreach ($es as $e) {
