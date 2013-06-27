@@ -96,6 +96,7 @@ class tcCalendar {
 					if (strpos($mycontent->text, 'repeats') !== false && strpos($mycontent->text, 'repeats=never') === false) {
 						$normal = false;
 						$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
+
 						foreach ($start_times as $t) {
 							
 							if ($this->sd_i && $t < $this->sd_i) continue;
@@ -103,9 +104,12 @@ class tcCalendar {
 							
 							$mytime = new eZDateTime($t);
 							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
-							if ($type == 'fulldata') $e_o->start = strtotime((floor($mytime->month())) ."/". $mytime->day() ."/". $mytime->year() ." ".$e_o->hour.":".$e_o->minute);
 							if ($type == 'fulldata') {
-								$j_output[] = $e_o;
+								$e_o->start = strtotime((floor($mytime->month())) ."/". $mytime->day() ."/". $mytime->year() ." ".$e_o->hour.":".$e_o->minute);
+								foreach($e_o as $k=>$v) {
+									$e_o->$k = stripslashes($v);
+								}
+								$j_output[] = json_encode($e_o);
 							} else {
 								$output .= $this->eventobjecttojson($e_o);
 							}
@@ -116,13 +120,16 @@ class tcCalendar {
 			} 
 			if ($normal && $e_o->status != 'error_without_repeat') {
 				if ($type == 'fulldata') {
-					$j_output[] = $e_o;
+					foreach($e_o as $k=>$v) {
+						$e_o->$k = stripslashes($v);
+					}
+					$j_output[] = json_encode($e_o);
 				} else {
 					$output .= $this->eventobjecttojson($e_o);
 				}
 			}
 		}
-		if ($type == 'fulldata') return json_encode($j_output);
+		if ($type == 'fulldata') return "[".implode(",",$j_output)."]";
 		$output .= "];\r\n";
 		$output .= "var tc_cal_id = " . $this->node_id . ";";
 		return $output;
@@ -182,9 +189,11 @@ class tcCalendar {
 			if (array_key_exists($this->description_id, $objData) && is_object($objData[$this->description_id])) {
 				if ($objData[$this->description_id]->hasContent()) $e_o->description = trim(preg_replace("/\r|\n/", "", nl2br($objData[$this->description_id]->metaData())));
 			}
-			if (array_key_exists($this->description_id, $objData) && is_object($objData[$this->description_id])) {
+			if (array_key_exists($this->image_id, $objData) && is_object($objData[$this->image_id])) {
 				$im_data = $objData[$this->image_id]->content()->imageAlias('original');
 				if ($objData[$this->image_id]->hasContent()) $e_o->image = $im_data['url'];
+				$im_data2 = $objData[$this->image_id]->content()->imageAlias('small');
+				if ($objData[$this->image_id]->hasContent()) $e_o->image_small = $im_data2['url'];
 			}
 			$ven = array();
 			foreach(explode(",",$this->venue_id) as $v) {
