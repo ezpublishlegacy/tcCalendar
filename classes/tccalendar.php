@@ -52,23 +52,38 @@ class tcCalendar {
 			$this->sd_i = false;
 
 			$attribute_filter = array();
+			$attribute_filter2 = array();
+			
 			if ($to_time != null) {
 				$this->ed_i = strtotime($to_time.'T23:59:59');
 				$attribute_filter[] = array("event/".$this->sd, "between", array(0,strtotime($to_time.'T23:59:59')));
 			}
 			if ($from_time != null) {
 				$this->sd_i = strtotime($from_time);
-				$attribute_filter[] = array("event/".$this->ed, "not_between", array(1,strtotime($from_time)));
+				$attribute_filter[] = array("event/".$this->ed, "not_between", array(0,strtotime($from_time)));
+				
+				$attribute_filter2[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
+				$attribute_filter2[] = array("event/".$this->ed, "=", 0);
 				//$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
 			}
+			$params2 = $params;
+			
 			if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
+			if (count($attribute_filter2)) $params2['AttributeFilter'] = $attribute_filter;
 
 			$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
+			$events2 = eZContentObjectTreeNode::subTreeByNodeID( $params2, $cal_id );
+			
+			foreach ($events2 as $e) {
+				$events[]=$e;
+			}
 		      
 			if (in_array($cal_node->object()->contentClass()->attribute('id'), $eventclasses) && $for_output) $events = array($cal_node);
+			
+			
 
 			$this->events = $events;
-		
+
 		}
 		
 	}
@@ -190,10 +205,13 @@ class tcCalendar {
 				if ($objData[$this->description_id]->hasContent()) $e_o->description = trim(preg_replace("/\r|\n/", "", nl2br($objData[$this->description_id]->metaData())));
 			}
 			if (array_key_exists($this->image_id, $objData) && is_object($objData[$this->image_id])) {
+				
 				$im_data = $objData[$this->image_id]->content()->imageAlias('original');
-				if ($objData[$this->image_id]->hasContent()) $e_o->image = $im_data['url'];
-				$im_data2 = $objData[$this->image_id]->content()->imageAlias('small');
-				if ($objData[$this->image_id]->hasContent()) $e_o->image_small = $im_data2['url'];
+				$im_data2 = $objData[$this->image_id]->content()->imageAlias('image_export');
+				if ($objData[$this->image_id]->hasContent()) {
+					$e_o->image = $im_data['url'];
+					$e_o->image_small = $im_data2['url'];
+				}
 			}
 			$ven = array();
 			foreach(explode(",",$this->venue_id) as $v) {
@@ -209,7 +227,6 @@ class tcCalendar {
 		if ($this->allDay === false) $e_o->allDay = 'false';
 		$e_o->HasPopup = ($this->HasPopup == enabled) ? 'true' : 'false';
 		$e_o->url = $forjs.'/' . $e->urlAlias(). $forjs;
-		
 		return $e_o;
 	}
 	
