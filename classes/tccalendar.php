@@ -104,7 +104,7 @@ class tcCalendar {
 	}
 	
 	static function outputasjson($cal_id, $from_time = null, $to_time = null, $event_id=null) {
-		if ($event_id !== null) return ezjscAjaxContent::nodeEncode(eZContentObjectTreeNode::fetch($event_id)->Object(), array('dataMap'=>array('all')));
+		if ($event_id !== null) return ezjscAjaxContent::nodeEncode(eZContentObjectTreeNode::fetch($event_id), array('imagePreGenerateSizes' => array('image_export_large', 'image_export'), 'dataMap'=>array('all')));
 		$cal = new tcCalendar($cal_id, $from_time, $to_time);
 		return $cal->monthtojson('fulldata');
 	}
