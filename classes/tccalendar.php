@@ -113,7 +113,6 @@ class tcCalendar {
 		$output =  "var tcevents = [\r\n";
 		$j_output = array();
 		foreach($this->events as $e) {
-
 			$e_o = $this->eventtoobject($e, $type);
 			if ($e_o === false) continue; 
 			$myclass_id = $e->object()->contentClass()->attribute('id');
@@ -126,8 +125,12 @@ class tcCalendar {
 					if (strpos($mycontent->text, 'repeats') !== false && strpos($mycontent->text, 'repeats=never') === false) {
 						$normal = false;
 						$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
-
+						
 						foreach ($start_times as $t) {
+							
+							if (count($start_times) > 3) {
+								$start_times = array();
+							}
 							
 							if ($this->sd_i && $t < $this->sd_i) continue;
 							if ($this->ed_i && $t > $this->ed_i) continue;
