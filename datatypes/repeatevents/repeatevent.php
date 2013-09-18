@@ -54,6 +54,7 @@ class eZRepeatEvent
 			}break;
 			case "weekly" : {
 				$RRULE .= "FREQ=WEEKLY;INTERVAL=$repeat_every;BYDAY=";
+				if (!isset($day)) $day = array();
 				foreach($day as $d) {
 					$RRULE .= strtoupper(substr($d, 0, 2)) . ",";
 				}
@@ -90,10 +91,10 @@ class eZRepeatEvent
 
 	function get_end_time() {
 		parse_str($this->text);
-		if ($ends == "never") {
+		if (isset($ends) && $ends == "never") {
 			return -1;
 		}
-		if ($ends_on != '') {
+		if (isset($ends_on) && $ends_on != '') {
 			return strtotime(urldecode($ends_on));
 		}
 		switch ( $repeats )
@@ -178,7 +179,6 @@ class eZRepeatEvent
 			}
 			if ($limit && count($output) >= $limit) $running = false;
 		}
-				eZDebug::writeDebug($output, 'valid');
 		return $output;
 	}
 

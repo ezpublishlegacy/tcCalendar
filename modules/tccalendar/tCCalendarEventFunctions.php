@@ -39,22 +39,23 @@ Class tCCalendarEventFunctions {
 		}
 		
 		
-		$es = eZSearch::search($query, array('SearchLimit' => 99999, 'SortBy' => array('meta_name_t' => 'asc'),'Filter' => array($base_filter)));
+		$es = eZSearch::search($query, array('FieldsToReturn' => array('attr_signature_event_b', 'attr_event_repeat_t', 'attr_'.$sd_i.'_dt', 'meta_node_id_si'), 'AsObjects' => false, 'SearchLimit' => 99999, 'SortBy' => array('meta_name_t' => 'asc'),'Filter' => array($base_filter)));
 
 		$out = array();
 
 		foreach ($es['SearchResult'] as $e) {
-			$dm = $e->dataMap();
-			$r = $dm['event_repeat'];
-			if ($r->hasContent() && $r->content()->isValid()) {
-				$next_start_r = $r->content()->get_timestamps(strtotime($from_date), false, 1);
+			
+			$r = new eZRepeatEvent($e['event_repeat_t']);
+			if ($r->isValid()) {
+				$r->end = $r->get_end_time();
+				$next_start_r = $r->get_timestamps(strtotime($from_date), false, 1);
 				$next_start = $next_start_r[0];
 				$pre = 'Multiple dates from ';
 			} else {
-				$next_start = $dm[$sd_i]->attribute('data_int');
+				$next_start = strtotime($e[$sd_i.'_dt']);
 				$pre = '';
 			}
-			$out[] = array('start' => $next_start, 'event' => $e, 'prefix' => $pre);
+			$out[] = array('start' => $next_start, 'event' => $e, 'prefix' => $pre, 'type' => $e['signature_event_b']);
 		} 
 		
 		if ($sort_by == 'Date') {
@@ -68,6 +69,9 @@ Class tCCalendarEventFunctions {
 
 function eventTimeSort($item1,$item2)
 {
+	if ($item1['type'] != $item2['type']) {
+		return ($item1['type']) ? -1 : 1;
+	}
     if ($item1['start'] == $item2['start']) return 0;
     return ($item1['start'] > $item2['start']) ? 1 : -1;
 }
