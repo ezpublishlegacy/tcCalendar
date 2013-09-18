@@ -39,7 +39,7 @@ Class tCCalendarEventFunctions {
 		}
 		
 		
-		$es = eZSearch::search($query, array('FieldsToReturn' => array('attr_signature_event_b', 'attr_event_repeat_t', 'attr_'.$sd_i.'_dt', 'meta_node_id_si'), 'AsObjects' => false, 'SearchLimit' => 99999, 'SortBy' => array('meta_name_t' => 'asc'),'Filter' => array($base_filter)));
+		$es = eZSearch::search($query, array('FieldsToReturn' => array('attr_signature_event_b', 'attr_event_repeat_t', 'attr_'.$sd_i.'_dt', 'meta_node_id_si'), 'AsObjects' => false, 'SearchLimit' => 99999, 'SortBy' => array('attr_signature_event_b' => 'desc','attr_name_s' => 'asc'),'Filter' => array($base_filter)));
 
 		$out = array();
 
