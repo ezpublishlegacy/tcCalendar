@@ -50,7 +50,7 @@ Class tCCalendarEventFunctions {
 				$r->end = $r->get_end_time();
 				$next_start_r = $r->get_timestamps(strtotime($from_date), false, 1);
 				$next_start = $next_start_r[0];
-				$pre = 'Multiple dates from ';
+				$pre = 'Multiple dates including ';
 			} else {
 				$next_start = strtotime($e[$sd_i.'_dt']);
 				$pre = '';
