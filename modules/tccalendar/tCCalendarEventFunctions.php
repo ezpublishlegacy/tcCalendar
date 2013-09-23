@@ -52,7 +52,8 @@ Class tCCalendarEventFunctions {
 				$next_start = $next_start_r[0];
 				$pre = 'Multiple dates including ';
 			} else {
-				$next_start = strtotime($e[$sd_i.'_dt']);
+				$usedate_r = explode($e[$sd_i.'_dt'], 'T00');
+				$next_start = strtotime($usedate_r[0]);
 				$pre = '';
 			}
 			$out[] = array('start' => $next_start, 'event' => $e, 'prefix' => $pre, 'type' => $e['signature_event_b']);
