@@ -9,6 +9,10 @@ $ViewList['monthtojson'] = array(
     'script' => 'monthtojson.php',
     'params' => array( 'ParentNodeID') );
 
+$ViewList['test'] = array(
+    'script' => 'test.php',
+    'params' => array() );
+
 $ViewList['upcoming'] = array(
     'script' => 'upcoming.php',
     'params' => array( 'cal_id', 'from_time', 'to_time') );
