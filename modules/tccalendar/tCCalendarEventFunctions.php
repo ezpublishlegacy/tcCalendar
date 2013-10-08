@@ -30,7 +30,7 @@ Class tCCalendarEventFunctions {
 			
 		} else {
 			
-			$base_filter .= " AND ((attr_date_to_dt:[1969-12-31T19:00:00Z TO 1969-12-31T19:00:00Z] AND attr_date_from_dt:[$solr_from TO *]) OR (-attr_date_to_dt:[1969-12-31T19:00:00Z TO $solr_from]))";
+			$base_filter .= " AND ((attr_date_to_dt:[1969-12-31T19:00:00Z TO 1969-12-31T19:00:00Z] AND attr_date_from_dt:[$solr_from TO *]) OR (*:* NOT attr_date_to_dt:[1969-12-31T19:00:00Z TO $solr_from]))";
 			
 		}
 		
