@@ -148,6 +148,7 @@ class tcCalendar {
 		$time_from = $objData[$this->st]->content();
 		if (!is_object($time_from)) $time_from = new eZDateTime($date_from);
 		$e_o->hour = $time_from->hour();
+		$e_o->tz = "'" . $objData[$this->st]->attribute('data_text') . "'";
 		$e_o->minute = $time_from->minute();
 		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month()) -1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . $time_from->minute() .")";
 		
