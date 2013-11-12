@@ -21,7 +21,22 @@
 {literal}
 
 <script type='text/javascript' src='{/literal}{if is_set(sitelink)}{$data_src|sitelink("no")}{/else}{$data_src}{/if}{literal}'></script>
+<script type='text/javascript'>
+	$(document).ready(function() {
+		
+		$('#calendar').fullCalendar({
+			editable: false,
+			header: {
+				left: 'prev,next today',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay'
+			},
+			events: tcevents
+		});
+		$('#tcfullcalendar').css('float', 'left');
+	});
 
+</script>
 {/literal}
 
 <div id='tcfullcalendar' class='cal_nav_tab_long'>
