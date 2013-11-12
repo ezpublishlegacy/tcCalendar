@@ -123,8 +123,17 @@ class tcCalendar {
 		$e_o->end = $this->get_event_end($objData);
 		if ($this->allDay === false) $e_o->allDay = 'false';
 		$e_o->HasPopup = ($this->HasPopup == enabled) ? 'true' : 'false';
-		$e_o->url = '"/' . $e->urlAlias(). '"';
-		
+
+		// Use SiteLink extension if available
+		if (class_exists("SiteLink")) {
+			$sitelink = new SiteLink($e);
+			$sitelink_path = end($sitelink->path());
+			$e_o->url = '"' . $sitelink_path['url_alias'] . '"';
+
+		// Use old method if SiteLink not loaded.
+		} else {
+			$e_o->url = '"/' . $e->urlAlias(). '"';
+		}
 		return $e_o;
 	}
 	
