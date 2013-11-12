@@ -20,7 +20,7 @@
 
 {literal}
 
-<script type='text/javascript' src='{/literal}{$data_src}{literal}'></script>
+<script type='text/javascript' src='{/literal}{if is_set(sitelink)}{$data_src|sitelink("no")}{/else}{$data_src}{/if}{literal}'></script>
 
 {/literal}
 
