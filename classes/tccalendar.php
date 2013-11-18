@@ -145,36 +145,48 @@ class tcCalendar {
 		return preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n";
 	}
 	
-	function get_event_start($objData, $e_o) {
+	function get_event_start($objData, $e_o, $type=false) {
 		
-		if (!is_object($objData[$this->sd])) return false;
-		if (!is_object($objData[$this->st])) {
-			$this->allDay = true;
-			return false;
-		}
-					
+		if ((!is_object($objData[$this->sd])) || $objData[$this->sd]->hasContent() != 1) return false;
 		$date_from = $objData[$this->sd]->content();
-		$time_from = $objData[$this->st]->content();
-		if (!is_object($time_from)) $time_from = new eZDateTime($date_from);
+		if ((!is_object($objData[$this->st])) || $objData[$this->st]->hasContent() != 1) {
+			$this->allDay = true;
+			$time_from = new eZDateTime($date_from);
+			$time_from->setHour(0);
+			$time_from->setMinute(0);
+			$time_from->setSecond(0);
+		} else {
+			$time_from = $objData[$this->st]->content();
+		}
 		$e_o->hour = $time_from->hour();
 		$e_o->minute = $time_from->minute();
-		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month()) -1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . $time_from->minute() .")";
+		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month())-1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . str_pad($time_from->minute(), 2, "0", STR_PAD_LEFT) .")";
+		if ($type == 'fulldata') $out = strtotime((floor($date_from->month())) ."/". $date_from->day() ."/". $date_from->year() ." ".$time_from->hour().":".str_pad($time_from->minute(), 2, "0", STR_PAD_LEFT));
+		
+		$test_start = strtotime((floor($date_from->month())) ."/". $date_from->day() ."/". $date_from->year());
+		if ($this->ed_i && $test_start > $this->ed_i) $e_o->status = 'error_without_repeat';
 		
 		return $out;
 			 
 	}
 	
-	function get_event_end($objData) {
-	
+	function get_event_end($objData, $e_o, $type=false) {
 		if (!is_object($objData[$this->ed])) {
 			$this->allDay = true;
+			if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
 			return false;
+		} else {
+			if ($objData[$this->ed]->attribute('data_int') == 0) {
+				$this->allDay = true;
+				if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
+			}
 		}
 		if (!is_object($objData[$this->et])) {
 			$this->allDay = true;
 			return false;
 		}
-					
+
+		
 		$date_to = $objData[$this->ed]->content();
 		$time_to = $objData[$this->et]->content();
 		if (!is_object($time_to)) $time_to = new eZDateTime($date_to);
@@ -183,8 +195,13 @@ class tcCalendar {
 			$this->allDay = true;
 			return false;
 		}
+
+		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month())-1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . str_pad($time_to->minute(), 2, "0", STR_PAD_LEFT) .")";
+		if ($type == 'fulldata') $out = strtotime((floor($date_to->month())) ."/". $date_to->day() ."/". $date_to->year() ." ".$time_to->hour().":".str_pad($time_to->minute(), 2, "0", STR_PAD_LEFT));
 		
-		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month()) -1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . $time_to->minute() .")";
+		$test_end = strtotime((floor($date_to->month())) ."/". $date_to->day() ."/". $date_to->year());
+		
+		if ($this->sd_i && $test_end < $this->sd_i) return false;
 		
 		return $out;
 				
