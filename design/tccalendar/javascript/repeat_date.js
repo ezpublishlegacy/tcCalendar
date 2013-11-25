@@ -131,7 +131,7 @@ function event_ends_on_picker(){
 			$("#repeatevents .date [name='occurrences']").val('');
 		}
 	})
-	jQuery("[name='ends_on']").datepicker({showOn:'button',
+	if (jQuery("[name='ends_on']").length > 0) jQuery("[name='ends_on']").datepicker({showOn:'button',
                                          buttonText:"Calendar",
                                          buttonImageOnly:false,
                                          showAnim:'fadeIn',
