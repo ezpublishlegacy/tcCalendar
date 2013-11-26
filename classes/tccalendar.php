@@ -197,7 +197,7 @@ class tcCalendar {
 		
 		}
 		
-		if ($this->allDay === false) $e_o->allDay = 'false';
+		$e_o->allDay = ($this->allDay === false)  ? 'false' : 'true';
 		$e_o->HasPopup = ($this->HasPopup == enabled) ? 'true' : 'false';
 		$e_o->url = $forjs.'/' . $e->urlAlias(). $forjs;
 		
@@ -238,29 +238,19 @@ class tcCalendar {
 	}
 	
 	function get_event_end($objData, $e_o, $type=false) {
-		if (!is_object($objData[$this->ed])) {
-			$this->allDay = true;
+		if (!is_object($objData[$this->ed]) || $objData[$this->ed]->attribute('data_int') == 0) {
+			$date_to = $objData[$this->sd]->content();
 			if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
-			return false;
 		} else {
-			if ($objData[$this->ed]->attribute('data_int') == 0) {
-				$this->allDay = true;
-				if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
-			}
+			$date_to = $objData[$this->ed]->content();
 		}
-		if (!is_object($objData[$this->et])) {
-			$this->allDay = true;
-			return false;
-		}
-
-		
-		$date_to = $objData[$this->ed]->content();
-		$time_to = $objData[$this->et]->content();
-		if (!is_object($time_to)) $time_to = new eZDateTime($date_to);
-		
-		if (!is_object($time_to) || date('His', $time_to->timeStamp()) == '000000') {
-			$this->allDay = true;
-			return false;
+		if (!is_object($objData[$this->et]) || $objData[$this->et]->attribute('data_int') == 0) {
+			if ($this->allDay) return false; 
+			$time_to = $objData[$this->st]->content();
+			$temp_ts = $time_to->timeStamp();
+			$time_to->setTimeStamp($temp_ts + (60*60));
+		} else {
+			$time_to = $objData[$this->et]->content();
 		}
 
 		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month())-1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . str_pad($time_to->minute(), 2, "0", STR_PAD_LEFT) .")";
