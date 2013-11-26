@@ -1,6 +1,6 @@
 <!--[if lt IE 7]> <style type="text/css"> @import url({"stylesheets/repeat_date_ie.css"|ezdesign(no)}); </style> <![endif]-->
 
-{ezscript_require(array('repeat_date.js'))}
+{ezscript_require(array('repeat_date.js', 'ezjsc::jqueryUI'))}
 {ezcss_require(array('repeat_date.css'))}
 
 {def $repeats=first_set($attribute.data_text|explode('repeats=').1|explode('&').0, 'never')}  
