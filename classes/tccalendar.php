@@ -5,6 +5,8 @@ class tcCalendar {
 	function tcCalendar($cal_id, $from_time = null, $to_time = null) {
 		
 		$ezphpicalendarini = eZINI::instance( 'tccalendar.ini' );
+		$contentini = eZINI::instance( 'content.ini' );
+		$myroot = $contentini->variable( 'NodeSettings', 'RootNode' );
 		
 		$is_master_id = $ezphpicalendarini->variable( 'ClassSettings', 'IsMasterAttributeIdentifier' );
 		
@@ -18,8 +20,9 @@ class tcCalendar {
 		
 			$this->is_master = (array_key_exists($is_master_id, $cal_node_data)) ? $cal_node_data[$is_master_id]->content() : true;
 		
-			if ($this->is_master) $cal_id = 2;
+			if ($this->is_master) $cal_id = $myroot;
 		
+			$calclasses = $ezphpicalendarini->variable( "ClassSettings", "CalClassIds" );
 			$eventclasses = $ezphpicalendarini->variable( "ClassSettings", "EventClassIds" );
 		
 			$this->title_id = $ezphpicalendarini->variable( "ClassSettings", "TitleAttributeIdentifier");
@@ -38,10 +41,20 @@ class tcCalendar {
 			$this->HasPopup = $ezphpicalendarini->variable( "PopupOptions", "HasPopup");
 			$this->col_r=array();
 		
+			if (!is_array($calclasses)) $eventclasses = array($calclasses);
 			if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
+			
+			$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $calclasses, 'AsObject' => false);
+			
+			$cals = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
+			
+			$cal_ids = array();
+			
+			foreach ($cals as $c) {
+				$cal_ids[] = $c['main_node_id'];
+			} 
 
-			$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
-		
+			$params = array('Depth' => 1, 'ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
 		
 			if (!$this->is_master) {
 				$params['Depth'] = 1;
@@ -63,7 +76,7 @@ class tcCalendar {
 			}
 			if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
 
-			$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
+			$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_ids );
 		      
 			if (in_array($cal_node->object()->contentClass()->attribute('id'), $eventclasses) && $for_output) $events = array($cal_node);
 
