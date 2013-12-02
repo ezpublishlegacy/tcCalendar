@@ -85,6 +85,8 @@ class tcCalendar {
 		foreach($this->events as $e) {
 
 			$e_o = $this->eventtoobject($e, $type);
+			$diff = $e_o->ts_e - $e_o->ts_s;
+
 			if ($e_o === false) continue; 
 			$myclass_id = $e->object()->contentClass()->attribute('id');
 			$repeaters = $this->r;
@@ -102,11 +104,15 @@ class tcCalendar {
 							if ($this->ed_i && $t > $this->ed_i) continue;
 							
 							$mytime = new eZDateTime($t);
+							$mytime_e = new eZDateTime($t + $diff);
 							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
+							$e_o->end = "new Date(" . $mytime_e->year() . ", " . (floor($mytime_e->month()) -1) . ", " . $mytime_e->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
 							if ($type == 'fulldata') $e_o->start = strtotime((floor($mytime->month())) ."/". $mytime->day() ."/". $mytime->year() ." ".$e_o->hour.":".$e_o->minute);
 							if ($type == 'fulldata') {
 								$j_output[] = $e_o;
 							} else {
+	
+								
 								$output .= $this->eventobjecttojson($e_o);
 							}
 							
@@ -225,6 +231,7 @@ class tcCalendar {
 		} else {
 			$time_from = $objData[$this->st]->content();
 		}
+		$e_o->ts_s = $date_from->timestamp();
 		$e_o->hour = $time_from->hour();
 		$e_o->minute = $time_from->minute();
 		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month())-1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . str_pad($time_from->minute(), 2, "0", STR_PAD_LEFT) .")";
@@ -252,7 +259,7 @@ class tcCalendar {
 		} else {
 			$time_to = $objData[$this->et]->content();
 		}
-
+		$e_o->ts_e = $date_to->timestamp();
 		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month())-1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . str_pad($time_to->minute(), 2, "0", STR_PAD_LEFT) .")";
 		if ($type == 'fulldata') $out = strtotime((floor($date_to->month())) ."/". $date_to->day() ."/". $date_to->year() ." ".$time_to->hour().":".str_pad($time_to->minute(), 2, "0", STR_PAD_LEFT));
 		
