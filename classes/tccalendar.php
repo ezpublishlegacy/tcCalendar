@@ -5,6 +5,8 @@ class tcCalendar {
 	function tcCalendar($cal_id, $from_time = null, $to_time = null) {
 		
 		$ezphpicalendarini = eZINI::instance( 'tccalendar.ini' );
+		$contentini = eZINI::instance( 'content.ini' );
+		$myroot = $contentini->variable( 'NodeSettings', 'RootNode' );
 		
 		$is_master_id = $ezphpicalendarini->variable( 'ClassSettings', 'IsMasterAttributeIdentifier' );
 		
@@ -16,9 +18,10 @@ class tcCalendar {
 		
 		$this->is_master = (array_key_exists($is_master_id, $cal_node_data)) ? $cal_node_data[$is_master_id]->content() : true;
 		
-		if ($this->is_master) $cal_id = 2;
+		if ($this->is_master) $cal_id = $myroot;
 		
 		$eventclasses = $ezphpicalendarini->variable( "ClassSettings", "EventClassIds" );
+		$calclasses = $ezphpicalendarini->variable( "ClassSettings", "CalClassIds" );
 		
 		$this->title_id = $ezphpicalendarini->variable( "ClassSettings", "TitleAttributeIdentifier");
 		$this->location_id = $ezphpicalendarini->variable( "ClassSettings", "LocationAttributeIdentifier");
@@ -31,27 +34,40 @@ class tcCalendar {
 		$this->HasPopup = $ezphpicalendarini->variable( "PopupOptions", "HasPopup");
 		$this->col_r=array();
 		
+		if (!is_array($calclasses)) $eventclasses = array($calclasses);
 		if (!is_array($eventclasses)) $eventclasses = array($eventclasses);
+		
+		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $calclasses, 'AsObject' => false);
+		
+		$cals = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
+		
+		$cal_ids = array($cal_id);
+		
+		foreach ($cals as $c) {
+			$cal_ids[] = $c['main_node_id'];
+		}
 
 		$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses, 'SortBy' => array(array('attribute', true, "event/".$this->sd),array('name', true)));
 		
+		$params['Depth'] = 1;
+		$params['DepthOperator'] = 'eq';
 		
-		if (!$this->is_master) {
-			$params['Depth'] = 1;
-			$params['DepthOperator'] = 'eq';
-		}
+		$this->ed_i = false;
+		$this->sd_i = false;
 
 		$attribute_filter = array();
 		if ($to_time != null) {
 			$attribute_filter[] = array("event/".$this->sd, "between", array(0,strtotime($to_time.'T23:59:59')));
+			$this->ed_i = strtotime($to_time.'T23:59:59');
 		}
 		if ($from_time != null) {
+			$this->sd_i = strtotime($from_time);
 			$attribute_filter[] = array("event/".$this->ed, "not_between", array(1,strtotime($from_time)));
-			$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
+			//$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
 		}
 		if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
 
-		$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
+		$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_ids );
 		      
 		if (in_array($cal_node->object()->contentClass()->attribute('id'), $eventclasses) && $for_output) $events = array($cal_node);
 
@@ -64,6 +80,9 @@ class tcCalendar {
 		foreach($this->events as $e) {
 
 			$e_o = $this->eventtoobject($e);
+			if ($e_o === false) continue; 
+			
+			$diff = $e_o->ts_e - $e_o->ts_s;
 			$myclass_id = $e->object()->contentClass()->attribute('id');
 			$repeaters = $this->r;
 			$normal = true;
@@ -75,15 +94,21 @@ class tcCalendar {
 						$normal = false;
 						$start_times = $dm[$repeaters[$myclass_id]]->content()->get_timestamps();
 						foreach ($start_times as $t) {
+							
+							if ($this->sd_i && $t < $this->sd_i) continue;
+							if ($this->ed_i && $t > $this->ed_i) continue;
+							
 							$mytime = new eZDateTime($t);
+							$mytime_e = new eZDateTime($t + $diff);
 							$e_o->start = "new Date(" . $mytime->year() . ", " . (floor($mytime->month()) -1) . ", " . $mytime->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
+							$e_o->end = "new Date(" . $mytime_e->year() . ", " . (floor($mytime_e->month()) -1) . ", " . $mytime_e->day() . ", " . $e_o->hour . ", " . $e_o->minute .")";
 						
 							$output .= $this->eventobjecttojson($e_o);
 						}
 					}
 				}
 			} 
-			if ($normal) {
+			if ($normal && $e_o->status != 'error_without_repeat') {
 				$output .= $this->eventobjecttojson($e_o);
 			}
 		}
@@ -110,8 +135,16 @@ class tcCalendar {
 		}
 		$event_id = $e->attribute('node_id');
 		$objData = $e->dataMap();
+		if (array_key_exists('hide_from_calendar', $objData) && $objData['hide_from_calendar']->content()) return false; 
 		$e_o = new stdClass();
-		$e_o->backgroundColor = '"'.$parent_col.'"';
+		if (class_exists('tcEventDataFetcher')) {
+			$event_data = tcEventDataFetcher::fetchData($e);
+			foreach($event_data as $event_data_k => $event_data_v) {
+				$e_o->$event_data_k = $event_data_v;
+			}
+		} else {
+			$e_o->backgroundColor = $e_o->backgroundColor = '"'.$parent_col.'"';
+		}
 		$e_o->id = $event_id;
 		if (array_key_exists($this->title_id, $objData) && is_object($objData[$this->title_id])) {
 			$e_o->title = '"'.addslashes(preg_replace('/[^(\x20-\x7F)]*/','', $objData[$this->title_id]->content())).'"';
@@ -140,7 +173,7 @@ class tcCalendar {
 	function eventobjecttojson($e_o) {
 		$out = chr(123);
 		foreach($e_o as $k=>$v) {
-			if ($v) $out .= "$k: $v,\r\n";
+			if ($v && $k !='status') $out .= "$k: $v,\r\n";
 		}
 		return preg_replace("/,\r\n$/", "", $out) . chr(125) . ",\r\n";
 	}
@@ -158,6 +191,7 @@ class tcCalendar {
 		} else {
 			$time_from = $objData[$this->st]->content();
 		}
+		$e_o->ts_s = $date_from->timestamp();
 		$e_o->hour = $time_from->hour();
 		$e_o->minute = $time_from->minute();
 		$out = "new Date(" . $date_from->year() . ", " . (floor($date_from->month())-1) . ", " . $date_from->day() . ", " . $time_from->hour() . ", " . str_pad($time_from->minute(), 2, "0", STR_PAD_LEFT) .")";
@@ -171,30 +205,21 @@ class tcCalendar {
 	}
 	
 	function get_event_end($objData, $e_o, $type=false) {
-		if (!is_object($objData[$this->ed])) {
-			$this->allDay = true;
+		if (!is_object($objData[$this->ed]) || $objData[$this->ed]->attribute('data_int') == 0) {
+			$date_to = $objData[$this->sd]->content();
 			if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
-			return false;
 		} else {
-			if ($objData[$this->ed]->attribute('data_int') == 0) {
-				$this->allDay = true;
-				if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
-			}
+			$date_to = $objData[$this->ed]->content();
 		}
-		if (!is_object($objData[$this->et])) {
-			$this->allDay = true;
-			return false;
+		if (!is_object($objData[$this->et]) || $objData[$this->et]->attribute('data_int') == 0) {
+			if ($this->allDay) return false; 
+			$time_to = $objData[$this->st]->content();
+			$temp_ts = $time_to->timeStamp();
+			$time_to->setTimeStamp($temp_ts + (60*60));
+		} else {
+			$time_to = $objData[$this->et]->content();
 		}
-
-		
-		$date_to = $objData[$this->ed]->content();
-		$time_to = $objData[$this->et]->content();
-		if (!is_object($time_to)) $time_to = new eZDateTime($date_to);
-		
-		if (!is_object($time_to) || date('His', $time_to->timeStamp()) == '000000') {
-			$this->allDay = true;
-			return false;
-		}
+		$e_o->ts_e = $date_to->timestamp();
 
 		$out = "new Date(" . $date_to->year() . ", " . (floor($date_to->month())-1) . ", " . $date_to->day() . ", " . $time_to->hour() . ", " . str_pad($time_to->minute(), 2, "0", STR_PAD_LEFT) .")";
 		if ($type == 'fulldata') $out = strtotime((floor($date_to->month())) ."/". $date_to->day() ."/". $date_to->year() ." ".$time_to->hour().":".str_pad($time_to->minute(), 2, "0", STR_PAD_LEFT));
@@ -212,8 +237,10 @@ class tcCalendar {
 	var $output;
 	var $sd;
 	var $st;
+	var $sd_i;
 	var $ed;
 	var $et;
+	var $ed_i;
 	var $r;
 	var $col_r;
 	var $allDay;
