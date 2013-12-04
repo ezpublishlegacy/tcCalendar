@@ -48,18 +48,17 @@ class tcCalendar {
 			
 			$cals = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
 			
-			$cal_ids = array();
+			$cal_ids = array($cal_id);
 			
 			foreach ($cals as $c) {
 				$cal_ids[] = $c['main_node_id'];
 			} 
 
-			$params = array('Depth' => 1, 'ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
+			$params = array('ClassFilterType' => 'include', 'ClassFilterArray' => $eventclasses);
 		
-			if (!$this->is_master) {
-				$params['Depth'] = 1;
-				$params['DepthOperator'] = 'eq';
-			}
+			$params['Depth'] = 1;
+			$params['DepthOperator'] = 'eq';
+
 			
 			$this->ed_i = false;
 			$this->sd_i = false;
