@@ -205,17 +205,23 @@ class tcCalendar {
 	}
 	
 	function get_event_end($objData, $e_o, $type=false) {
-		if (!is_object($objData[$this->ed]) || $objData[$this->ed]->attribute('data_int') == 0) {
+		if (!is_object($objData[$this->ed]) || $objData[$this->ed]->attribute('data_int') == 0 || $objData[$this->ed]->attribute('data_int') == null) {
 			$date_to = $objData[$this->sd]->content();
 			if (($objData[$this->sd]->attribute('data_int') + (60*60*24) -1) < $this->sd_i ) $e_o->status = 'error_without_repeat';
 		} else {
 			$date_to = $objData[$this->ed]->content();
 		}
-		if (!is_object($objData[$this->et]) || $objData[$this->et]->attribute('data_int') == 0) {
-			if ($this->allDay) return false; 
+		if (!is_object($objData[$this->et]) || $objData[$this->et]->attribute('data_int') == 0 || $objData[$this->et]->attribute('data_int') == null) {
 			$time_to = $objData[$this->st]->content();
-			$temp_ts = $time_to->timeStamp();
-			$time_to->setTimeStamp($temp_ts + (60*60));
+			if (is_object($time_to)) {
+				$temp_ts = $time_to->timeStamp();
+				$time_to->setTimeStamp($temp_ts + (60*60));
+			} else {
+				$time_to = new eZDateTime($date_to);
+				$time_to->setHour(0);
+				$time_to->setMinute(0);
+				$time_to->setSecond(0);
+			}
 		} else {
 			$time_to = $objData[$this->et]->content();
 		}
