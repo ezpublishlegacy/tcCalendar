@@ -266,6 +266,7 @@ class tcCalendar {
 		if (!is_object($objData[$this->et]) || $objData[$this->et]->attribute('data_int') == 0) {
 			if ($this->allDay) return false; 
 			$time_to = $objData[$this->st]->content();
+			if (!is_object($time_to)) return false;
 			$temp_ts = $time_to->timeStamp();
 			$time_to->setTimeStamp($temp_ts + (60*60));
 		} else {
