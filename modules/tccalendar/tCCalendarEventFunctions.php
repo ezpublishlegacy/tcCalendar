@@ -2,7 +2,12 @@
 
 Class tCCalendarEventFunctions {
 	
-	function fetchEvents($from_date, $to_date, $offset = 0, $limit = 10000, $query = '*', $filters, $sort_by, $parent_node) {
+	function fetchEvents($from_date, $to_date, $offset = 0, $limit = 10000, $query = '*:*', $filters, $sort_by, $parent_node) {
+		
+		
+		if (!$query) {
+		    $query="*:*";
+		}
 		
 		if (!$from_date) {
 			$from_date = date('Y-m-d');
@@ -39,20 +44,20 @@ Class tCCalendarEventFunctions {
 		}
 		
 		
-		$es = eZSearch::search($query, array('FieldsToReturn' => array('attr_'.$sd_i.'_dt', 'meta_node_id_si', 'attr_date_to_dt'), 'AsObjects' => false, 'SearchLimit' => 99999, 'SortBy' => array('attr_signature_event_b' => 'desc','attr_name_s' => 'asc'),'Filter' => array($base_filter)));
+		$es = eZSearch::search($query, array('FieldsToReturn' => array('attr_'.$sd_i.'_dt', 'meta_node_id_si', 'attr_date_to_dt', 'attr_event_repeat_t'), 'AsObjects' => false, 'SearchLimit' => 99999, 'SortBy' => array('attr_name_s' => 'asc'),'Filter' => array($base_filter)));
 
 		$out = array();
 
 		foreach ($es['SearchResult'] as $e) {
 			
-			$r = new eZRepeatEvent((isset($e['event_repeat_t']))?$e['event_repeat_t']:"");
+			$r = new eZRepeatEvent((isset($e["fields"]['attr_event_repeat_t']))?$e["fields"]['attr_event_repeat_t']:"");
 			if ($r->isValid()) {
 				$r->end = $r->get_end_time();
 				$next_start_r = $r->get_timestamps(strtotime($from_date), false, 1);
 				$next_start = $next_start_r[0];
 				$pre = 'Multiple dates including ';
 			} else {
-				$usedate = str_replace('Z','', $e[$sd_i.'_dt']);
+				$usedate = str_replace('Z','', $e["fields"]["attr_".$sd_i.'_dt']);
 				$next_start = strtotime($usedate);
 				$pre = '';
 			}

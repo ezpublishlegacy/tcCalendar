@@ -29,8 +29,14 @@ class eZRepeatEvent
         return in_array( $name, $this->attributes() );
     }
 
+	function isValid() {
+		$rrule = $this->text_to_rrule();
+		return (strpos($rrule, 'FREQ') !== false && (strpos($rrule, 'UNTIL') !== false || strpos($rrule, 'COUNT') !== false)) ? true : false;
+	}
+
 	function text_to_rrule() {
 		parse_str($this->text);
+		if (!isset($repeats)) $repeats = ''; 
 		$RRULE = "";
 		switch ( $repeats )
 		{
@@ -48,6 +54,7 @@ class eZRepeatEvent
 			}break;
 			case "weekly" : {
 				$RRULE .= "FREQ=WEEKLY;INTERVAL=$repeat_every;BYDAY=";
+				if (!isset($day)) $day = array();
 				foreach($day as $d) {
 					$RRULE .= strtoupper(substr($d, 0, 2)) . ",";
 				}
@@ -74,9 +81,9 @@ class eZRepeatEvent
 				$RRULE .= "FREQ=YEARLY;INTERVAL=$repeat_every";
 			}break;
 		}
-		if ($occurrences !='') {
+		if (isset($occurrences) && $occurrences !='') {
 			$RRULE .= "COUNT=$occurrences;";
-		} elseif ($ends_on != '') {
+		} elseif (isset($ends_on) && $ends_on != '') {
 			$RRULE .= "UNTIL=" . date("Ymj",strtotime(urldecode($ends_on))) ."T". date("His",$start_time) .";";
 		}
 		return trim($RRULE,";");
@@ -84,10 +91,10 @@ class eZRepeatEvent
 
 	function get_end_time() {
 		parse_str($this->text);
-		if ($ends == "never") {
+		if (isset($ends) && $ends == "never") {
 			return -1;
 		}
-		if ($ends_on != '') {
+		if (isset($ends_on) && $ends_on != '') {
 			return strtotime(urldecode($ends_on));
 		}
 		switch ( $repeats )
@@ -155,7 +162,7 @@ class eZRepeatEvent
 		return -100;
 	}
 	
-	function get_timestamps($start_time = FALSE, $end_time = FALSE) {
+	function get_timestamps($start_time = FALSE, $end_time = FALSE, $limit = false) {
 		if ($start_time === false) $start_time = $this->attribute('start_time');
 		$result = array();
 		$start = new iCalDate($start_time);
@@ -170,6 +177,7 @@ class eZRepeatEvent
 			} else {
 				$output[] = $next_date->_epoch;
 			}
+			if ($limit && count($output) >= $limit) $running = false;
 		}
 		return $output;
 	}
