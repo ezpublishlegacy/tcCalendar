@@ -2,7 +2,7 @@
 
 class tcCalendar {
 
-	function tcCalendar($cal_id, $from_time = null, $to_time = null) {
+	function tcCalendar($cal_id, $from_time = null, $to_time = null, $related_nodes = array()) {
 		
 		$ezphpicalendarini = eZINI::instance( 'tccalendar.ini' );
 		
@@ -50,8 +50,10 @@ class tcCalendar {
 			$attribute_filter[] = array("event/".$this->sd, "not_between", array(0,strtotime($from_time)));
 		}
 		if (count($attribute_filter)) $params['AttributeFilter'] = $attribute_filter;
+		
+		$related_nodes[] = $cal_id;
 
-		$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $cal_id );
+		$events = eZContentObjectTreeNode::subTreeByNodeID( $params, $related_nodes );
 		      
 		if (in_array($cal_node->object()->contentClass()->attribute('id'), $eventclasses) && $for_output) $events = array($cal_node);
 

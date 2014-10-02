@@ -22,12 +22,12 @@ class monthtojsonOperator
 
     function namedParameterList()
     {
-        return array( 'asort' => array('first_param' => array( 'type' => 'integer', 'required' => false, 'default' => 2 ) ) );
+        return array( 'monthtojson' => array('first_param' => array( 'type' => 'array', 'required' => false, 'default' => array() ) ) );
     }
 
-    function modify( $tpl, &$operatorName, &$operatorParameters, $rootNamespace, $currentNamespace, &$operatorValue, &$namedParameters )
+    function modify( $tpl, &$operatorName, &$operatorParameters, $rootNamespace, $currentNamespace, &$operatorValue, &$first_param )
     {
-		$tc = new tcCalendar($operatorValue);
+		$tc = new tcCalendar($operatorValue, null, null, $first_param['first_param']);
 		$operatorValue = $tc->monthtojson();
 		return true;
     }
