@@ -24,7 +24,7 @@ Class tCCalendarEventFunctions {
 		$base_filter = "meta_class_identifier_ms:event";
 
 		if ($to_date && $to_date != '') {
-			$solr_to = $locale->formatDateTimeType( $classFormat, strtotime($to_date) + 1 );
+			$solr_to = $locale->formatDateTimeType( $classFormat, strtotime($to_date) + 86400 );
 			
 			$base_filter .= " AND (attr_date_from_dt:[$solr_from TO $solr_to] OR attr_date_to_dt:[$solr_from TO $solr_to])";
 			
