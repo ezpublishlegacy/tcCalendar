@@ -17,5 +17,13 @@ $eZTemplateOperatorArray[] = array( 'script' => 'extension/tccalendar/operators/
 $eZTemplateOperatorArray[] = array( 'script' => 'extension/tccalendar/operators/firstsun.php',
                                     'class' => 'firstsunOperator',
                                     'operator_names' => array( 'firstsun' ) );
+                                    
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/tccalendar/operators/firstsun.php',
+                                    'class' => 'firstsunOperator',
+                                    'operator_names' => array( 'firstsun' ) );
+                                    
+$eZTemplateOperatorArray[] = array( 'script' => 'extension/tccalendar/operators/ezservervars.php',
+                                    'class' => 'ServerVarsOperator',
+                                    'operator_names' => array( 'servervars', 'postvars', 'getvars','ezservervars', 'ezpostvars', 'ezgetvars' ) );
 
 ?>
