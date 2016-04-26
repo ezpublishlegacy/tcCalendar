@@ -25,7 +25,9 @@ $fetchEventsParams = array(
     'ClassFilterType'  => 'include',
     'ClassFilterArray' => array( 'event' ),
     'AttributeFilter'  => array(
-        array( 'event/date_to', '<=', $date->format( 'U' ) )
+        'and',
+        array( 'event/date_to', '<=', $date->format( 'U' ) ),
+        array( 'event/date_to', '>', 0 )
     ),
     'LoadDataMap'      => false,
     'AsObject'         => false,
